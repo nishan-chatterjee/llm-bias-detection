@@ -1,0 +1,12 @@
+{
+  "primary_estimand": "gemma-3-27b-it-abliterated-normpreserve-v1 minus gemma-3-27b-it, exactly matched by ideology, LHS row, and question",
+  "primary_item_pairs": 111600,
+  "primary_configuration_pairs": 1800,
+  "secondary_benchmarks": [
+    "mean over all standard Gemma sizes within matched design cells",
+    "mean over all non-abliterated models within matched design cells",
+    "each non-abliterated model within matched design cells"
+  ],
+  "inference": "Primary confidence intervals and tests use means clustered by ideology and LHS row; BH q-values cover tests within analysis level.",
+  "caveat": "Only the same-size standard Gemma-3-27B contrast holds family, size, prompts, and design cells fixed. Pooled benchmarks are descriptive."
+}

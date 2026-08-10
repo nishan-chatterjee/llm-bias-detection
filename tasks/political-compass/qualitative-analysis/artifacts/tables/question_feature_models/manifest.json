@@ -1,0 +1,12 @@
+{
+  "rows": 2232,
+  "questions": 62,
+  "holdout": "GroupKFold by question_id",
+  "feature_sets": [
+    "metadata",
+    "structured",
+    "text",
+    "combined"
+  ],
+  "interpretation": "Incremental performance over metadata-only estimates whether question wording/general features predict unseen-item difficulty."
+}

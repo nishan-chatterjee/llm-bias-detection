@@ -1,0 +1,20 @@
+{
+  "task": "predict Qwen think_rescue versus think_harm",
+  "validation": "10-fold grouped by Political Compass proposition",
+  "sampling": "balanced binary samples within the available matched outcomes",
+  "classifier": "logistic regression",
+  "embedding_model": "BAAI/bge-m3",
+  "visible_rationale": {
+    "rows": 23999,
+    "length_only_macro_f1": 0.4993537298747215,
+    "content_only_macro_f1": 0.5481668933249556,
+    "content_plus_length_macro_f1": 0.5491540976637923
+  },
+  "hidden_thinking": {
+    "rows": 12000,
+    "length_only_macro_f1": 0.5461975574552334,
+    "content_only_macro_f1": 0.5638356835886909,
+    "content_plus_length_macro_f1": 0.5617616765461956
+  },
+  "interpretation": "Modest out-of-question discrimination; not a causal explanation of rescue or harm."
+}

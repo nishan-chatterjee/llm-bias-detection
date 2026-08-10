@@ -1,0 +1,24 @@
+{
+  "source": "derived from matched primary-model left/right item contrasts in the companion dataset",
+  "rows": 7440,
+  "matched_pairs_per_cell": [
+    300
+  ],
+  "minimum_pooled_events": 30,
+  "minimum_risk_difference": 0.05,
+  "features": {
+    "hedging": "visible_hedging_present",
+    "moral_distance": "visible_moral_distance_present",
+    "actual_refusal": "visible_actual_refusal_present",
+    "persona_meta": "visible_persona_meta_present",
+    "self_correction": "visible_self_correction_present"
+  },
+  "class_counts": {
+    "uninformative_low_exposure": 4258,
+    "no_substantive_pocket": 1540,
+    "cross_family_recurrence": 1214,
+    "within_family_recurrence": 342,
+    "isolated_model_pocket": 86
+  },
+  "interpretation": "Thresholds rank discovery pockets; confidence intervals are descriptive and are not used as a significance gate."
+}

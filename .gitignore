@@ -1,0 +1,71 @@
+# Python and notebook state
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Local environments and editor files
+.env
+.venv/
+venv/
+.idea/
+.vscode/
+
+# Logs, scheduler output, and local scratch space
+*.log
+slurm-*.out
+tmp/
+scratch/
+
+# Model weights and caches are never part of this repository
+models/serve/**/config.json
+models/serve/**/*.bin
+models/serve/**/*.gguf
+models/serve/**/*.safetensors
+models/serve/**/*.pt
+models/serve/**/*.pth
+models/serve/**/tokenizer.json
+models/serve/**/tokenizer.model
+models/serve/**/tokenizer_config.json
+models/serve/**/vocab.json
+models/serve/**/merges.txt
+models/serve/**/model.safetensors.index.json
+.cache/
+
+# The reconstructed Political Compass scorer is generated locally and is not
+# redistributed. The public reconstruction inputs and verification code remain
+# tracked.
+tasks/political-compass/instrument/*.npz
+**/model.npz
+**/scorer.npz
+**/reconstructed_model_parameters.npz
+
+# Keep third-party Political Compass material local until redistribution has
+# been cleared. These files may be mounted from the private dataset/restricted
+# workspace for reproduction.
+tasks/political-compass/data/questions/*.json
+tasks/political-compass/instrument/political_compass_data.csv
+
+# The compact 30-topic IBM extract is tracked with CC BY-SA attribution. Local
+# Arrow caches of the full upstream test split are unnecessary for this task.
+tasks/sentiment/data/questions/ibm-claim-stance/*.arrow
+
+# Pending colleague handoff and component-license verification.
+tasks/hate-speech/data/corpus/english.jsonl
+
+# Large raw/generated traces belong in the companion Hugging Face dataset.
+tasks/**/output/**/*.jsonl
+tasks/**/output/**/*.parquet
+tasks/**/output/**/*.arrow
+tasks/**/output/**/*.csv
+tasks/political-compass/qualitative-analysis/artifacts/corpus/
+tasks/political-compass/qualitative-analysis/artifacts/features/*.parquet
+tasks/political-compass/qualitative-analysis/artifacts/tables/gemma_abliteration/exact_item_pairs.parquet
+tasks/political-compass/qualitative-analysis/artifacts/tables/gemma_abliteration/question_specific_effects.csv
+dataset/staging/
+dataset/downloads/
+
+# Generated analysis products that can be recreated from the released data.
+tasks/**/artifacts/embeddings/

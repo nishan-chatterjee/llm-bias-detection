@@ -1,0 +1,21 @@
+{
+  "models": [
+    "gemma-3-1b-it",
+    "gemma-3-4b-it",
+    "gemma-3-12b-it",
+    "gemma-3-27b-it",
+    "Qwen3-4B_no_think",
+    "Qwen3-8B_no_think",
+    "Qwen3-14B_no_think",
+    "Qwen3-32B_no_think",
+    "Qwen3-4B_think",
+    "Qwen3-8B_think",
+    "Qwen3-14B_think",
+    "Qwen3-32B_think"
+  ],
+  "short_persona_only": true,
+  "statement_and_persona_vocabulary_redacted": true,
+  "max_ngram": 3,
+  "candidate_rows": 8441,
+  "confirmed_rows": 8105
+}

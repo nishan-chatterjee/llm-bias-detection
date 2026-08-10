@@ -1,0 +1,9 @@
+model,successful_rows,error_rows,unique_configs,unique_items,expected_rows,coverage,path_exists
+gemma-3-1b-it,54000,0,1800,30,54000,1.0,True
+gemma-3-4b-it,54000,0,1800,30,54000,1.0,True
+gemma-3-12b-it,54000,0,1800,30,54000,1.0,True
+gemma-3-27b-it,54000,0,1800,30,54000,1.0,True
+Qwen3-4B,54000,0,1800,30,54000,1.0,True
+Qwen3-8B,54000,0,1800,30,54000,1.0,True
+Qwen3-14B,54000,0,1800,30,54000,1.0,True
+Qwen3-32B,54000,0,1800,30,54000,1.0,True

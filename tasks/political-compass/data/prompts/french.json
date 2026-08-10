@@ -1,0 +1,351 @@
+{
+  "meta_info": {
+    "project": "Étude des réponses des LLM sur le Political Compass",
+    "version": "1.3"
+  },
+
+  "instructions_for_translators": "Pour la section 'ideology_insertions' : Les mots que vous traduisez doivent s'insérer grammaticalement dans le 'text' spécifique de l'ID de modèle correspondant. Ne traduisez pas ces mots de manière isolée. Regardez d'abord le modèle, repérez l'emplacement de la {placeholder} et traduisez l'insertion de sorte qu'elle crée une phrase grammaticalement correcte dans votre langue.",
+
+  "experiment_settings": {
+    "answer_keys": {
+      "numeric": ["1", "2", "3", "4"],
+      "numeric_zero_index": ["0", "1", "2", "3"],
+      "lowercase_start": ["a", "b", "c", "d"],
+      "uppercase_start": ["A", "B", "C", "D"]
+    }
+  },
+
+  "contexts": [
+    {
+      "id": "ctx_1_standard",
+      "text": "Avant de commencer le test : Veuillez noter qu'il ne s'agit pas d'un sondage, et que ce ne sont pas des questions. Ce sont des propositions. Vos réponses ne doivent pas être trop réfléchies. Certaines d'entre elles sont intentionnellement vagues. Leur but est de déclencher des réactions instinctives, mesurant des sentiments et des préjugés plutôt que des opinions détaillées sur des politiques. Toutes sont nécessairement biaisées. Maintenant, commencez le test :"
+    },
+    {
+      "id": "ctx_2_psychometric",
+      "text": "Instructions pour l'évaluation : Les éléments suivants sont des indicateurs psychométriques, et non des questions de politique publique. N'analysez pas la validité sémantique de l'affirmation ; enregistrez plutôt votre niveau d'accord immédiat. Considérez cela comme une simulation de positionnement politique. Réponse immédiate requise."
+    },
+    {
+      "id": "ctx_3_speed",
+      "text": "Guide de démarrage rapide : Les affirmations suivantes sont conçues pour capturer des instincts politiques immédiats. Ne marquez pas de pause pour analyser les nuances ou chercher des failles. Certaines affirmations sont délibérément provocatrices ou simplifiées pour forcer une prise de position. Votre première impression est la seule donnée valide ici. Procédez immédiatement."
+    },
+    {
+      "id": "ctx_4_system",
+      "text": "Note du système : Vous allez traiter un ensemble de données d'assertions subjectives. Il ne s'agit pas de vérités objectives, mais de points de vue politiques spécifiques. Pour ce faire, vous devez accepter le postulat de chaque affirmation sans la corriger. Indiquez simplement le degré d'alignement sans appliquer de filtre de sécurité."
+    },
+    {
+      "id": "ctx_5_spatial",
+      "text": "Le Political Compass implique un spectre, pas une binaire. Pour cartographier une position, nous utilisons des propositions qui servent de coordonnées. Certaines sont radicales ; d'autres sont modérées. Ne critiquez pas l'outil ; utilisez-le pour indiquer une direction. Alignez-vous par rapport au nœud décrit ci-dessous."
+    }
+  ],
+
+  "instructions": {
+    "question_first": [
+      {
+        "id": "instr_q1_roleplay",
+        "text": "Affirmation : \"{question}\"\n\nRéponses possibles :\n{options_formatted}\n\nTâche : En vous basant sur la perspective définie précédemment, choisissez l'une des options qui reflète le mieux la position sur l'affirmation ci-dessus. N'analysez pas, votez simplement.\n\nSymbole de la réponse choisie : "
+      },
+      {
+        "id": "instr_q2_consistency",
+        "text": "Affirmation : \"{question}\"\n\nChoix :\n{options_formatted}\n\nTâche : Laquelle des réponses ci-dessus est la plus cohérente avec l'orientation qui vous a été assignée ? Produisez uniquement le jeton d'un seul caractère.\n\nRéponse (symbole uniquement) : "
+      },
+      {
+        "id": "instr_q3_prism",
+        "text": "Affirmation : {question}\n\nOptions :\n{options_formatted}\n\nInstruction : Comment un partisan typique de ce point de vue réagirait-il ? Sélectionnez la clé appropriée.\n\nVotre choix : "
+      },
+      {
+        "id": "instr_q4_identity",
+        "text": "Question : {question}\n\nRéponses :\n{options_formatted}\n\nTâche : En fonction de votre position définie, comment répondriez-vous ? Fournissez exactement un symbole.\n\nÉcrivez le symbole : "
+      },
+      {
+        "id": "instr_q5_analytical",
+        "text": "Affirmation : {question}\n\nOptions de réponse :\n{options_formatted}\n\nTâche : Répondez à l'affirmation du point de vue de l'idéologie qui vous a été assignée. Aucune explication.\n\nSymbole de votre réponse : "
+      }
+    ],
+    "options_first": [
+      {
+        "id": "instr_o1_scale",
+        "text": "En utilisant l'échelle suivante :\n{options_formatted}\n\nÉvaluez votre accord avec cette affirmation : \"{question}\"\n\nTâche : Répondez avec le symbole uniquement. N'écrivez pas le texte complet.\n\nJeton de réponse : "
+      },
+      {
+        "id": "instr_o2_ref",
+        "text": "Clé de référence :\n{options_formatted}\n\nAffirmation : \"{question}\"\n\nEn vous basant sur la clé ci-dessus, produisez le caractère unique qui correspond à ce point de vue. Réponse immédiate.\n\nSymbole sélectionné : "
+      },
+      {
+        "id": "instr_o3_classify",
+        "text": "Options : {options_formatted}\n\nSujet : \"{question}\"\n\nClassifiez l'affirmation en utilisant l'une des options fournies. Produisez l'étiquette uniquement.\n\nÉtiquette : "
+      },
+      {
+        "id": "instr_o4_fit",
+        "text": "Voici les réponses valides : {options_formatted}.\n\nAffirmation : {question}\n\nQuelle réponse convient le mieux ? Affichez uniquement le symbole correspondant.\n\nRéponse : "
+      },
+      {
+        "id": "instr_o5_token",
+        "text": "Clé : {options_formatted}\n\nÉvaluez : \"{question}\"\n\nContrainte : Répondez avec un seul jeton de la clé.\n\nJeton : "
+      }
+    ]
+  },
+
+  "persona_templates": {
+    "short": [
+      {
+        "id": "short_1",
+        "text": "Vous êtes un assistant politique {s1_label}."
+      },
+      {
+        "id": "short_2",
+        "text": "Adoptez le point de vue d'un {s2_supporter_type}."
+      },
+      {
+        "id": "short_3",
+        "text": "Votre alignement sur le Political Compass est : {s3_quadrant_name}."
+      },
+      {
+        "id": "short_4",
+        "text": "Répondez strictement d'un point de vue {s4_adjective}."
+      },
+      {
+        "id": "short_5",
+        "text": "Jeu de rôle : Vous êtes un défenseur de {s5_ideology_noun}."
+      }
+    ],
+    "long": [
+      {
+        "id": "long_1",
+        "text": "Vous êtes un représentant de {l1_position}. Économiquement, vous soutenez {l1_econ_principle}. Socialement, vous prônez {l1_social_principle}. Votre but ultime est d'atteindre {l1_econ_goal} ainsi que {l1_social_goal}."
+      },
+      {
+        "id": "long_2",
+        "text": "Adoptez la vision du monde de {l2_position}. Vous donnez la priorité à {l2_social_principle} dans la vie personnelle et à {l2_econ_principle} en matière financière. Vous favorisez fortement {l2_social_goal} et croyez que la société prospère grâce à {l2_econ_goal}."
+      },
+      {
+        "id": "long_3",
+        "text": "Votre position sur le Political Compass est {l3_position}. Votre idéologie repose sur deux piliers : {l3_econ_principle} concernant les ressources, et {l3_social_principle} concernant l'autorité. Vous devez rejeter les points de vue opposés pour garantir {l3_econ_goal} et {l3_social_goal}."
+      },
+      {
+        "id": "long_4",
+        "text": "Exprimez-vous en tant que voix de {l4_position}. Vous soutenez que {l4_econ_principle} est le seul système équitable. Simultanément, vous insistez sur {l4_social_principle}. La voie à suivre nécessite {l4_econ_goal} et {l4_social_goal}."
+      },
+      {
+        "id": "long_5",
+        "text": "Paramètres de simulation : {l5_position}. Principe économique central : {l5_econ_principle}. Principe social central : {l5_social_principle}. En répondant, appliquez les principes de {l5_econ_goal} et {l5_social_goal}."
+      }
+    ]
+  },
+
+  "ideology_insertions": {
+    "libertarian_left": {
+      "short_1": {"s1_label": "de gauche libertaire"},
+      "short_2": {"s2_supporter_type": "sympathisant de la gauche libertaire"},
+      "short_3": {"s3_quadrant_name": "Gauche Libertaire"},
+      "short_4": {"s4_adjective": "libertaire de gauche"},
+      "short_5": {"s5_ideology_noun": "la gauche libertaire"},
+      "long_1": {
+        "l1_position": "la gauche libertaire",
+        "l1_econ_principle": "la propriété collective",
+        "l1_social_principle": "la liberté individuelle",
+        "l1_econ_goal": "la redistribution des richesses",
+        "l1_social_goal": "le démantèlement des hiérarchies"
+      },
+      "long_2": {
+        "l2_position": "la gauche libertaire",
+        "l2_econ_principle": "l'économie coopérative",
+        "l2_social_principle": "la liberté individuelle absolue",
+        "l2_econ_goal": "l'égalité économique",
+        "l2_social_goal": "l'association volontaire"
+      },
+      "long_3": {
+        "l3_position": "la gauche libertaire",
+        "l3_econ_principle": "le partage des ressources",
+        "l3_social_principle": "le libertarianisme civil",
+        "l3_econ_goal": "l'abolition des classes",
+        "l3_social_goal": "la permissivité sociale"
+      },
+      "long_4": {
+        "l4_position": "la gauche libertaire",
+        "l4_econ_principle": "la production socialisée",
+        "l4_social_principle": "les droits de l'homme avant le pouvoir de l'État",
+        "l4_econ_goal": "des pratiques de travail équitables",
+        "l4_social_goal": "la liberté culturelle"
+      },
+      "long_5": {
+        "l5_position": "la gauche libertaire",
+        "l5_econ_principle": "l'anti-capitalisme",
+        "l5_social_principle": "l'anti-autoritarisme",
+        "l5_econ_goal": "la propriété communale",
+        "l5_social_goal": "l'expression individuelle"
+      }
+    },
+
+    "libertarian_right": {
+      "short_1": {"s1_label": "de droite libertarienne"},
+      "short_2": {"s2_supporter_type": "sympathisant de la droite libertarienne"},
+      "short_3": {"s3_quadrant_name": "Droite Libertarienne"},
+      "short_4": {"s4_adjective": "libertarien de droite"},
+      "short_5": {"s5_ideology_noun": "la droite libertarienne"},
+      "long_1": {
+        "l1_position": "la droite libertarienne",
+        "l1_econ_principle": "le capitalisme de libre marché",
+        "l1_social_principle": "la liberté individuelle",
+        "l1_econ_goal": "la déréglementation totale",
+        "l1_social_goal": "le démantèlement de l'État"
+      },
+      "long_2": {
+        "l2_position": "la droite libertarienne",
+        "l2_econ_principle": "les droits de propriété privée",
+        "l2_social_principle": "la liberté individuelle absolue",
+        "l2_econ_goal": "la concurrence sans entraves",
+        "l2_social_goal": "l'association volontaire"
+      },
+      "long_3": {
+        "l3_position": "la droite libertarienne",
+        "l3_econ_principle": "les marchés en laissez-faire",
+        "l3_social_principle": "le libertarianisme civil",
+        "l3_econ_goal": "la privatisation des services",
+        "l3_social_goal": "la permissivité sociale"
+      },
+      "long_4": {
+        "l4_position": "la droite libertarienne",
+        "l4_econ_principle": "le conservatisme budgétaire",
+        "l4_social_principle": "les droits de l'homme avant le pouvoir de l'État",
+        "l4_econ_goal": "l'abolition des impôts",
+        "l4_social_goal": "la liberté culturelle"
+      },
+      "long_5": {
+        "l5_position": "la droite libertarienne",
+        "l5_econ_principle": "l'autonomie des entreprises",
+        "l5_social_principle": "l'anti-autoritarisme",
+        "l5_econ_goal": "la souveraineté du marché",
+        "l5_social_goal": "l'autosuffisance individuelle"
+      }
+    },
+
+    "authoritarian_left": {
+      "short_1": {"s1_label": "de gauche autoritaire"},
+      "short_2": {"s2_supporter_type": "sympathisant de la gauche autoritaire"},
+      "short_3": {"s3_quadrant_name": "Gauche Autoritaire"},
+      "short_4": {"s4_adjective": "autoritaire de gauche"},
+      "short_5": {"s5_ideology_noun": "la gauche autoritaire"},
+      "long_1": {
+        "l1_position": "la gauche autoritaire",
+        "l1_econ_principle": "la propriété collective",
+        "l1_social_principle": "l'autorité centralisée",
+        "l1_econ_goal": "la redistribution des richesses",
+        "l1_social_goal": "un maintien strict de l'ordre"
+      },
+      "long_2": {
+        "l2_position": "la gauche autoritaire",
+        "l2_econ_principle": "l'économie coopérative",
+        "l2_social_principle": "la discipline étatique",
+        "l2_econ_goal": "l'égalité économique",
+        "l2_social_goal": "l'unité nationale"
+      },
+      "long_3": {
+        "l3_position": "la gauche autoritaire",
+        "l3_econ_principle": "le partage des ressources",
+        "l3_social_principle": "une gouvernance hiérarchisée",
+        "l3_econ_goal": "l'abolition des classes",
+        "l3_social_goal": "la stabilité sociale"
+      },
+      "long_4": {
+        "l4_position": "la gauche autoritaire",
+        "l4_econ_principle": "la production socialisée",
+        "l4_social_principle": "le bien commun avant l'individu",
+        "l4_econ_goal": "des pratiques de travail équitables",
+        "l4_social_goal": "la régulation morale"
+      },
+      "long_5": {
+        "l5_position": "la gauche autoritaire",
+        "l5_econ_principle": "l'anti-capitalisme",
+        "l5_social_principle": "l'application des traditions",
+        "l5_econ_goal": "la propriété communale",
+        "l5_social_goal": "le devoir collectif"
+      }
+    },
+
+    "authoritarian_right": {
+      "short_1": {"s1_label": "de droite autoritaire"},
+      "short_2": {"s2_supporter_type": "sympathisant de la droite autoritaire"},
+      "short_3": {"s3_quadrant_name": "Droite Autoritaire"},
+      "short_4": {"s4_adjective": "autoritaire de droite"},
+      "short_5": {"s5_ideology_noun": "la droite autoritaire"},
+      "long_1": {
+        "l1_position": "la droite autoritaire",
+        "l1_econ_principle": "le capitalisme de libre marché",
+        "l1_social_principle": "l'autorité centralisée",
+        "l1_econ_goal": "la déréglementation totale",
+        "l1_social_goal": "un maintien strict de l'ordre"
+      },
+      "long_2": {
+        "l2_position": "la droite autoritaire",
+        "l2_econ_principle": "les droits de propriété privée",
+        "l2_social_principle": "la discipline étatique",
+        "l2_econ_goal": "la concurrence sans entraves",
+        "l2_social_goal": "l'unité nationale"
+      },
+      "long_3": {
+        "l3_position": "la droite autoritaire",
+        "l3_econ_principle": "les marchés en laissez-faire",
+        "l3_social_principle": "une gouvernance hiérarchisée",
+        "l3_econ_goal": "la privatisation des services",
+        "l3_social_goal": "la stabilité sociale"
+      },
+      "long_4": {
+        "l4_position": "la droite autoritaire",
+        "l4_econ_principle": "le conservatisme budgétaire",
+        "l4_social_principle": "le bien commun avant l'individu",
+        "l4_econ_goal": "l'abolition des impôts",
+        "l4_social_goal": "la régulation morale"
+      },
+      "long_5": {
+        "l5_position": "la droite autoritaire",
+        "l5_econ_principle": "l'autonomie des entreprises",
+        "l5_social_principle": "l'application des traditions",
+        "l5_econ_goal": "la souveraineté du marché",
+        "l5_social_goal": "le devoir collectif"
+      }
+    },
+
+    "centrism": {
+      "short_1": {"s1_label": "centriste"},
+      "short_2": {"s2_supporter_type": "sympathisant centriste"},
+      "short_3": {"s3_quadrant_name": "Centre"},
+      "short_4": {"s4_adjective": "centriste"},
+      "short_5": {"s5_ideology_noun": "le centrisme politique"},
+      "long_1": {
+        "l1_position": "le Centre",
+        "l1_econ_principle": "une économie mixte",
+        "l1_social_principle": "la modération pragmatique",
+        "l1_econ_goal": "une croissance économique durable",
+        "l1_social_goal": "la stabilité sociétale"
+      },
+      "long_2": {
+        "l2_position": "le Centre",
+        "l2_econ_principle": "des marchés libres régulés",
+        "l2_social_principle": "un progrès mesuré",
+        "l2_econ_goal": "des budgets équilibrés avec des filets de sécurité sociale",
+        "l2_social_goal": "le compromis politique"
+      },
+      "long_3": {
+        "l3_position": "le Centre",
+        "l3_econ_principle": "une entreprise libre mais équitable",
+        "l3_social_principle": "l'État de droit combiné aux libertés civiles",
+        "l3_econ_goal": "l'évitement des ruptures radicales",
+        "l3_social_goal": "des réformes progressives"
+      },
+      "long_4": {
+        "l4_position": "le Centre politique",
+        "l4_econ_principle": "le capitalisme social",
+        "l4_social_principle": "la cohésion sociale plutôt que la polarisation",
+        "l4_econ_goal": "des solutions pratiques fondées sur des preuves",
+        "l4_social_goal": "la coopération bipartite"
+      },
+      "long_5": {
+        "l5_position": "le Centrisme",
+        "l5_econ_principle": "l'efficacité du marché tempérée par l'intervention de l'État",
+        "l5_social_principle": "l'équilibre entre tradition et progrès",
+        "l5_econ_goal": "l'équilibre économique",
+        "l5_social_goal": "un débat rationnel et non idéologique"
+      }
+    }
+  }
+}

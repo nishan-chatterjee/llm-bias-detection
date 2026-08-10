@@ -1,0 +1,97 @@
+{
+  "_comment": "Primary checkpoints and decoding settings used in the release. A local models/serve/<alias> directory takes precedence; otherwise repo_id and revision are resolved through Hugging Face. No model weights are distributed here.",
+  "gemma-3-1b-it": {
+    "repo_id": "google/gemma-3-1b-it",
+    "revision": "dcc83ea841ab6100d6b47a070329e1ba4cf78752",
+    "family": "gemma3",
+    "thinking": false,
+    "primary": true,
+    "params_B": 1,
+    "chat_generation": {"do_sample": true, "temperature": 1.0, "top_p": 0.95, "top_k": 64, "max_new_tokens": 4096}
+  },
+  "gemma-3-4b-it": {
+    "repo_id": "google/gemma-3-4b-it",
+    "revision": "093f9f388b31de276ce2de164bdc2081324b9767",
+    "family": "gemma3",
+    "thinking": false,
+    "primary": true,
+    "params_B": 4,
+    "chat_generation": {"do_sample": true, "temperature": 1.0, "top_p": 0.95, "top_k": 64, "max_new_tokens": 4096}
+  },
+  "gemma-3-12b-it": {
+    "repo_id": "google/gemma-3-12b-it",
+    "revision": "96b6f1eccf38110c56df3a15bffe176da04bfd80",
+    "family": "gemma3",
+    "thinking": false,
+    "primary": true,
+    "params_B": 12,
+    "chat_generation": {"do_sample": true, "temperature": 1.0, "top_p": 0.95, "top_k": 64, "max_new_tokens": 4096}
+  },
+  "gemma-3-27b-it": {
+    "repo_id": "google/gemma-3-27b-it",
+    "revision": "005ad3404e59d6023443cb575daa05336842228a",
+    "family": "gemma3",
+    "thinking": false,
+    "primary": true,
+    "params_B": 27,
+    "chat_generation": {"do_sample": true, "temperature": 1.0, "top_p": 0.95, "top_k": 64, "max_new_tokens": 4096}
+  },
+  "Qwen3-4B": {
+    "repo_id": "Qwen/Qwen3-4B",
+    "revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+    "family": "qwen3",
+    "thinking": true,
+    "primary": true,
+    "params_B": 4,
+    "chat_generation": {
+      "think": {"do_sample": true, "temperature": 0.6, "top_p": 0.95, "top_k": 20, "max_new_tokens": 8192},
+      "no_think": {"do_sample": true, "temperature": 0.7, "top_p": 0.8, "top_k": 20, "max_new_tokens": 4096}
+    }
+  },
+  "Qwen3-8B": {
+    "repo_id": "Qwen/Qwen3-8B",
+    "revision": "b968826d9c46dd6066d109eabc6255188de91218",
+    "family": "qwen3",
+    "thinking": true,
+    "primary": true,
+    "params_B": 8,
+    "chat_generation": {
+      "think": {"do_sample": true, "temperature": 0.6, "top_p": 0.95, "top_k": 20, "max_new_tokens": 8192},
+      "no_think": {"do_sample": true, "temperature": 0.7, "top_p": 0.8, "top_k": 20, "max_new_tokens": 4096}
+    }
+  },
+  "Qwen3-14B": {
+    "repo_id": "Qwen/Qwen3-14B",
+    "revision": "40c069824f4251a91eefaf281ebe4c544efd3e18",
+    "family": "qwen3",
+    "thinking": true,
+    "primary": true,
+    "params_B": 14,
+    "chat_generation": {
+      "think": {"do_sample": true, "temperature": 0.6, "top_p": 0.95, "top_k": 20, "max_new_tokens": 8192},
+      "no_think": {"do_sample": true, "temperature": 0.7, "top_p": 0.8, "top_k": 20, "max_new_tokens": 4096}
+    }
+  },
+  "Qwen3-32B": {
+    "repo_id": "Qwen/Qwen3-32B",
+    "revision": "9216db5781bf21249d130ec9da846c4624c16137",
+    "family": "qwen3",
+    "thinking": true,
+    "primary": true,
+    "params_B": 32,
+    "chat_generation": {
+      "think": {"do_sample": true, "temperature": 0.6, "top_p": 0.95, "top_k": 20, "max_new_tokens": 8192},
+      "no_think": {"do_sample": true, "temperature": 0.7, "top_p": 0.8, "top_k": 20, "max_new_tokens": 4096}
+    }
+  },
+  "gemma-3-27b-it-abliterated-normpreserve-v1": {
+    "repo_id": "YanLabs/gemma-3-27b-it-abliterated-normpreserve-v1",
+    "revision": "74cb74b3f2f60da67b6fd556f3ec52a677119f19",
+    "family": "gemma3",
+    "thinking": false,
+    "primary": false,
+    "secondary_ablation": true,
+    "params_B": 27,
+    "chat_generation": {"do_sample": true, "temperature": 1.0, "top_p": 0.95, "top_k": 64, "max_new_tokens": 4096}
+  }
+}

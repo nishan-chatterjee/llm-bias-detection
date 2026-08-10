@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this code or dataset, please cite the associated paper."
+title: "PoliLean evaluation release"
+type: software
+authors:
+  - family-names: Debevc
+    given-names: Luka
+  - family-names: Chatterjee
+    given-names: Nishan
+  - family-names: Pollak
+    given-names: Senja
+  - family-names: Doucet
+    given-names: Antoine
+  - family-names: Martinc
+    given-names: Matej
+license: MIT
+repository-code: "https://github.com/LukaDebevc/PoliLean_IJS"
+date-released: 2026-08-10
+version: "0.1.0"
