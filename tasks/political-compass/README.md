@@ -97,3 +97,10 @@ The notebooks in `analysis/notebooks/` operate on compact, primary-model
 configuration tables and use a consistent presentation order. They do not need
 model weights. Raw-to-aggregate conversion requires a locally reconstructed
 scorer and is documented in `analysis/README.md`.
+
+`mcq-chat-analysis-selected-visuals.ipynb` is the executed paper-facing visual
+selection notebook. Its finalized PNG/HTML exports are in `selected-visuals/`.
+The notebook expects the local historical MCQ/chat output layout plus a locally
+reconstructed `scorer.npz`; neither the scorer nor restricted propositions are
+tracked in Git. `build_mcq_chat_selected_visuals.py` provides a non-interactive
+execution helper once those local inputs are mounted.

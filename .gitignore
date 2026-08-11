@@ -54,6 +54,7 @@ tasks/sentiment/data/questions/ibm-claim-stance/*.arrow
 
 # Pending colleague handoff and component-license verification.
 tasks/hate-speech/data/corpus/english.jsonl
+tasks/hate-speech/output_hate_speech/
 
 # Large raw/generated traces belong in the companion Hugging Face dataset.
 tasks/**/output/**/*.jsonl

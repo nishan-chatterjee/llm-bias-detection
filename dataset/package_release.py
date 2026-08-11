@@ -11,6 +11,8 @@ import argparse
 import hashlib
 import json
 import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 import pandas as pd
@@ -136,7 +138,9 @@ def package(args: argparse.Namespace) -> None:
         stage / "inputs" / "ibm_sentiment" / "english_2-way-sentiment.json",
     )
 
-    # Hate speech: aggregate now, raw primary-model outputs after handoff.
+    # Hate speech: compact aggregate plus optional item-level conversion from
+    # the historical wide CSV handoff. The converter writes long Parquets and
+    # never treats the first target's legacy q-identifiers as global item IDs.
     copy(
         release / "tasks" / "hate-speech" / "analysis" / "data" / "hs_configuration_scores.csv",
         stage / "data" / "hate_speech_aggregate" / "hs_configuration_scores.csv",
@@ -148,6 +152,40 @@ def package(args: argparse.Namespace) -> None:
     hate_design = release / "dataset" / "generated" / "hate_speech_design.csv"
     if hate_design.exists():
         copy(hate_design, stage / "metadata" / "hate_speech_design.csv")
+    hate_status = "aggregate only; item-level handoff not supplied"
+    if args.hate_results_dir:
+        if not args.hate_design:
+            raise ValueError("--hate-design is required with --hate-results-dir")
+        conversion_manifest = stage / "metadata" / "hate_speech_conversion.json"
+        subprocess.run(
+            [
+                sys.executable,
+                str(
+                    release
+                    / "tasks"
+                    / "hate-speech"
+                    / "analysis"
+                    / "convert_historical_results.py"
+                ),
+                "--raw",
+                str(args.hate_results_dir.resolve()),
+                "--design",
+                str(args.hate_design.resolve()),
+                "--output",
+                str(stage / "data" / "hate_speech"),
+                "--manifest",
+                str(conversion_manifest),
+            ],
+            check=True,
+        )
+        for path in sorted((stage / "data" / "hate_speech").glob("*.parquet")):
+            row_counts[str(path.relative_to(stage))] = pq.read_metadata(path).num_rows
+        if len(list((stage / "data" / "hate_speech").glob("*.parquet"))) != 8:
+            raise ValueError("Historical hate conversion did not produce eight Parquets")
+        hate_status = (
+            "eight primary-model item-prediction Parquets included; source text, "
+            "exact prompt file, corpus file, and raw vocabulary logits absent"
+        )
 
     provenance = {
         "dataset_repo": args.dataset_repo,
@@ -158,7 +196,7 @@ def package(args: argparse.Namespace) -> None:
         "political_compass_propositions_included_restricted": bool(args.include_restricted_pct_inputs),
         "political_compass_scorer_included": False,
         "model_weights_included": False,
-        "hate_speech_raw_status": "pending colleague handoff",
+        "hate_speech_item_predictions_status": hate_status,
         "row_counts": row_counts,
     }
     (stage / "metadata").mkdir(parents=True, exist_ok=True)
@@ -190,6 +228,16 @@ def main() -> None:
     parser.add_argument("--dataset-repo", default="nishan-chatterjee/polilean-evaluation-traces")
     parser.add_argument("--include-ablation", action="store_true")
     parser.add_argument("--include-restricted-pct-inputs", action="store_true")
+    parser.add_argument(
+        "--hate-results-dir",
+        type=Path,
+        help="Directory containing the eight supplied historical wide result CSVs",
+    )
+    parser.add_argument(
+        "--hate-design",
+        type=Path,
+        help="Supplied experimental_design_hs.csv used by the historical run",
+    )
     package(parser.parse_args())
 
 

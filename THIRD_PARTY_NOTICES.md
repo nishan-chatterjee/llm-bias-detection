@@ -30,7 +30,10 @@ remain subject to those terms.
 
 ## Hate-speech sources
 
-The raw 1,332-item hate-speech corpus is not currently included. Before it or
-item-level outputs are added, the exact assembled split, component licences,
-attribution, and checksum must be verified from the collaborator handoff. The
+The private companion dataset includes model probabilities, gold labels,
+identity targets, and source metadata from the collaborator's completed run.
+It does not include source statements or the assembled corpus itself. The run
+used 13,320 target-specific rows (1,332 per target); each configuration scored
+one target's 1,332 rows. Before any public release, the exact assembled split,
+component licences, attribution, and checksum still require verification. The
 source documentation associates the material with Yoder et al. (CoNLL 2022).

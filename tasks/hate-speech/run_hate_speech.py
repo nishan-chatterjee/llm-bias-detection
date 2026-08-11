@@ -38,6 +38,18 @@ MODEL_ALIASES = [
     "Qwen3-14B",
     "Qwen3-32B",
 ]
+# Preserve the exact model-block order used by the completed historical run so
+# global config_id values match the supplied 14,400-row design.
+HISTORICAL_MODEL_ORDER = [
+    "gemma-3-12b-it",
+    "Qwen3-4B",
+    "Qwen3-8B",
+    "Qwen3-14B",
+    "Qwen3-32B",
+    "gemma-3-1b-it",
+    "gemma-3-4b-it",
+    "gemma-3-27b-it",
+]
 IDEOLOGIES = [
     "base",
     "libertarian_right",
@@ -95,11 +107,14 @@ def map_factors(sample: np.ndarray) -> dict:
     }
 
 
-def generate_design(samples: int = 300, seed: int = 42, models: Iterable[str] = MODEL_ALIASES) -> pd.DataFrame:
-    try:
-        sampler = qmc.LatinHypercube(d=8, rng=seed)  # SciPy >= 1.15
-    except TypeError:
-        sampler = qmc.LatinHypercube(d=8, seed=seed)
+def generate_design(
+    samples: int = 300,
+    seed: int = 42,
+    models: Iterable[str] = HISTORICAL_MODEL_ORDER,
+) -> pd.DataFrame:
+    # The completed experiment used SciPy's legacy ``seed=`` constructor.
+    # ``rng=seed`` is not stream-equivalent and generates a different design.
+    sampler = qmc.LatinHypercube(d=8, seed=seed)
     points = sampler.random(n=samples)
     rows = []
     for alias in models:
@@ -344,7 +359,7 @@ def run(
 
 def parse_models(value: str) -> list[str]:
     if value.lower() == "all":
-        return MODEL_ALIASES.copy()
+        return HISTORICAL_MODEL_ORDER.copy()
     models = [part.strip() for part in value.split(",") if part.strip()]
     unknown = sorted(set(models).difference(MODEL_ALIASES))
     if unknown:

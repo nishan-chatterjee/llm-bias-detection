@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -131,11 +132,74 @@ def test_hate_design_and_input_validation(tmp_path):
     assert all(len(values) == 1 for values in grouped.values())
 
 
+def test_hate_default_design_matches_completed_handoff():
+    module = load_module("hate_speech_exact_design", ROOT / "tasks" / "hate-speech" / "run_hate_speech.py")
+    generated = module.generate_design(300, 42)
+    supplied = pd.read_csv(ROOT / "dataset" / "generated" / "hate_speech_design.csv")
+    supplied = supplied[
+        [
+            "config_id", "language", "target", "context_id", "instr_idx",
+            "persona_class", "persona_idx", "model_alias", "ideology", "quantization",
+        ]
+    ]
+    for frame in (generated, supplied):
+        frame["context_id"] = pd.to_numeric(frame["context_id"], errors="coerce").fillna(-1).astype(int)
+        frame["persona_idx"] = pd.to_numeric(frame["persona_idx"], errors="coerce").fillna(-1).astype(int)
+        frame["persona_class"] = frame["persona_class"].fillna("").astype(str)
+    assert generated.reset_index(drop=True).equals(supplied.reset_index(drop=True))
+
+
+def test_historical_hate_conversion_uses_positional_item_index():
+    module = load_module(
+        "hate_historical_converter",
+        ROOT / "tasks" / "hate-speech" / "analysis" / "convert_historical_results.py",
+    )
+    prefixes = [f"q{index}" for index in range(1, 1_333)]
+    base = {
+        "config_id": [0, 1],
+        "model": ["google/gemma-3-12b-it"] * 2,
+        "quantization": ["bf16"] * 2,
+        "language": ["english"] * 2,
+        "ideology": ["base"] * 2,
+        "context_id": [-1, 0],
+        "instr_idx": [1, 2],
+        "persona_class": ["", ""],
+        "persona_idx": [-1, -1],
+    }
+    for index, prefix in enumerate(prefixes, 1):
+        base[prefix + "_is_hate_speech"] = [index % 2 == 0, index % 2 == 0]
+        base[prefix + "_target"] = ["women", "men"]
+        base[prefix + "_meta"] = ["fixture;a", "fixture;b"]
+        base[prefix + "_prob_ans_0"] = [0.25, 0.75]
+        base[prefix + "_prob_ans_1"] = [0.75, 0.25]
+    chunk = pd.DataFrame(base)
+    expected = pd.DataFrame(
+        {
+            "config_id": [0, 1],
+            "model_alias": ["gemma-3-12b-it"] * 2,
+            "language": ["english"] * 2,
+            "target": ["women", "men"],
+            "context_id": [-1, 0],
+            "instr_idx": [1, 2],
+            "persona_class": ["", ""],
+            "persona_idx": [-1, -1],
+            "ideology": ["base"] * 2,
+        }
+    ).set_index("config_id", drop=False)
+    long = module._long_chunk(chunk, prefixes, expected)
+    assert len(long) == 2 * 1_332
+    assert long.groupby("config_id")["item_index"].agg(["min", "max"]).to_dict("index") == {
+        0: {"min": 1, "max": 1_332},
+        1: {"min": 1, "max": 1_332},
+    }
+    assert set(long.loc[long["config_id"].eq(0), "target"]) == {"women"}
+    assert set(long.loc[long["config_id"].eq(1), "target"]) == {"men"}
+    assert np.allclose(long["p_hate"] + long["p_not_hate"], 1.0)
+
+
 def test_tracked_analysis_shapes():
     sentiment = ROOT / "tasks" / "sentiment" / "analysis" / "data"
     hate = ROOT / "tasks" / "hate-speech" / "analysis" / "data"
-    import pandas as pd
-
     coverage = pd.read_csv(sentiment / "coverage_by_model.csv")
     assert len(coverage) == 8
     assert coverage["successful_rows"].sum() == 432_000

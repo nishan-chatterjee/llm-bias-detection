@@ -60,9 +60,11 @@ def validate(stage: Path) -> None:
     mcq_files = sorted((stage / "data" / "political_compass_mcq").glob("*.parquet"))
     chat_files = sorted((stage / "data" / "political_compass_chat").glob("*.parquet"))
     ibm_files = sorted((stage / "data" / "ibm_sentiment").glob("*.parquet"))
+    hate_files = sorted((stage / "data" / "hate_speech").glob("*.parquet"))
     assert len(mcq_files) == 24
     assert len(chat_files) == 12
     assert len(ibm_files) == 8
+    assert len(hate_files) == 8
 
     for path in mcq_files:
         frame = pq.read_table(path).to_pandas()
@@ -103,6 +105,42 @@ def validate(stage: Path) -> None:
         assert table["error"].null_count == table.num_rows, path
         assert len(np.unique(np.asarray(table["item_uid"]))) == table.num_rows, path
         validate_struct_probabilities(table, "classification_probs", 2)
+
+    for path in hate_files:
+        parquet = pq.ParquetFile(path)
+        assert parquet.metadata.num_rows == 1_800 * 1_332, path
+        assert "text" not in parquet.schema.names
+        assert "candidate_logits" not in parquet.schema.names
+        pairs = np.empty(parquet.metadata.num_rows, dtype=np.int64)
+        aliases: set[str] = set()
+        offset = 0
+        for batch in parquet.iter_batches(
+            batch_size=100_000,
+            columns=[
+                "config_id", "item_index", "model_alias", "target",
+                "p_hate", "p_not_hate",
+            ],
+        ):
+            config_id = np.asarray(batch.column("config_id"), dtype=np.int64)
+            item_index = np.asarray(batch.column("item_index"), dtype=np.int64)
+            p_hate = np.asarray(batch.column("p_hate"), dtype=float)
+            p_not_hate = np.asarray(batch.column("p_not_hate"), dtype=float)
+            assert np.isfinite(p_hate).all() and np.isfinite(p_not_hate).all(), path
+            assert ((p_hate >= 0) & (p_hate <= 1)).all(), path
+            assert ((p_not_hate >= 0) & (p_not_hate <= 1)).all(), path
+            # Historical candidate probabilities are bf16-rounded; the
+            # observed maximum sum deviation is 1/512 (0.001953125).
+            assert np.allclose(p_hate + p_not_hate, 1.0, atol=3e-3), path
+            assert ((item_index >= 1) & (item_index <= 1_332)).all(), path
+            aliases.update(batch.column("model_alias").to_pylist())
+            assert all(value for value in batch.column("target").to_pylist()), path
+            count = len(config_id)
+            pairs[offset : offset + count] = config_id * 2_000 + item_index
+            offset += count
+        assert offset == parquet.metadata.num_rows
+        assert aliases.issubset(PRIMARY) and len(aliases) == 1, (path, aliases)
+        assert len(np.unique(pairs)) == parquet.metadata.num_rows, path
+        assert len(np.unique(pairs // 2_000)) == 1_800, path
 
     ablation_files = sorted(
         (stage / "data" / "political_compass_chat_ablation").glob("*.parquet")

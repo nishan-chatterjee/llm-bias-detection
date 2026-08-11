@@ -1,0 +1,241 @@
+visual,unified_model_or_mode,ideology,points_per_cluster
+political_compass_mcq_only.png,Gemma 1B MCQ,authoritarian_left,900
+political_compass_mcq_only.png,Gemma 1B MCQ,authoritarian_right,900
+political_compass_mcq_only.png,Gemma 1B MCQ,base,900
+political_compass_mcq_only.png,Gemma 1B MCQ,centrism,900
+political_compass_mcq_only.png,Gemma 1B MCQ,libertarian_left,900
+political_compass_mcq_only.png,Gemma 1B MCQ,libertarian_right,900
+political_compass_mcq_only.png,Gemma 4B MCQ,authoritarian_left,900
+political_compass_mcq_only.png,Gemma 4B MCQ,authoritarian_right,900
+political_compass_mcq_only.png,Gemma 4B MCQ,base,900
+political_compass_mcq_only.png,Gemma 4B MCQ,centrism,900
+political_compass_mcq_only.png,Gemma 4B MCQ,libertarian_left,900
+political_compass_mcq_only.png,Gemma 4B MCQ,libertarian_right,900
+political_compass_mcq_only.png,Gemma 12B MCQ,authoritarian_left,900
+political_compass_mcq_only.png,Gemma 12B MCQ,authoritarian_right,900
+political_compass_mcq_only.png,Gemma 12B MCQ,base,900
+political_compass_mcq_only.png,Gemma 12B MCQ,centrism,900
+political_compass_mcq_only.png,Gemma 12B MCQ,libertarian_left,900
+political_compass_mcq_only.png,Gemma 12B MCQ,libertarian_right,900
+political_compass_mcq_only.png,Gemma 27B MCQ,authoritarian_left,900
+political_compass_mcq_only.png,Gemma 27B MCQ,authoritarian_right,900
+political_compass_mcq_only.png,Gemma 27B MCQ,base,900
+political_compass_mcq_only.png,Gemma 27B MCQ,centrism,900
+political_compass_mcq_only.png,Gemma 27B MCQ,libertarian_left,900
+political_compass_mcq_only.png,Gemma 27B MCQ,libertarian_right,900
+political_compass_mcq_only.png,Qwen 4B MCQ,authoritarian_left,900
+political_compass_mcq_only.png,Qwen 4B MCQ,authoritarian_right,900
+political_compass_mcq_only.png,Qwen 4B MCQ,base,900
+political_compass_mcq_only.png,Qwen 4B MCQ,centrism,900
+political_compass_mcq_only.png,Qwen 4B MCQ,libertarian_left,900
+political_compass_mcq_only.png,Qwen 4B MCQ,libertarian_right,900
+political_compass_mcq_only.png,Qwen 8B MCQ,authoritarian_left,900
+political_compass_mcq_only.png,Qwen 8B MCQ,authoritarian_right,900
+political_compass_mcq_only.png,Qwen 8B MCQ,base,900
+political_compass_mcq_only.png,Qwen 8B MCQ,centrism,900
+political_compass_mcq_only.png,Qwen 8B MCQ,libertarian_left,900
+political_compass_mcq_only.png,Qwen 8B MCQ,libertarian_right,900
+political_compass_mcq_only.png,Qwen 14B MCQ,authoritarian_left,900
+political_compass_mcq_only.png,Qwen 14B MCQ,authoritarian_right,900
+political_compass_mcq_only.png,Qwen 14B MCQ,base,900
+political_compass_mcq_only.png,Qwen 14B MCQ,centrism,900
+political_compass_mcq_only.png,Qwen 14B MCQ,libertarian_left,900
+political_compass_mcq_only.png,Qwen 14B MCQ,libertarian_right,900
+political_compass_mcq_only.png,Qwen 32B MCQ,authoritarian_left,900
+political_compass_mcq_only.png,Qwen 32B MCQ,authoritarian_right,900
+political_compass_mcq_only.png,Qwen 32B MCQ,base,900
+political_compass_mcq_only.png,Qwen 32B MCQ,centrism,900
+political_compass_mcq_only.png,Qwen 32B MCQ,libertarian_left,900
+political_compass_mcq_only.png,Qwen 32B MCQ,libertarian_right,900
+political_compass_chat_modes.png,Gemma 1B Chat,authoritarian_left,300
+political_compass_chat_modes.png,Gemma 1B Chat,authoritarian_right,300
+political_compass_chat_modes.png,Gemma 1B Chat,base,300
+political_compass_chat_modes.png,Gemma 1B Chat,centrism,300
+political_compass_chat_modes.png,Gemma 1B Chat,libertarian_left,300
+political_compass_chat_modes.png,Gemma 1B Chat,libertarian_right,300
+political_compass_chat_modes.png,Gemma 4B Chat,authoritarian_left,300
+political_compass_chat_modes.png,Gemma 4B Chat,authoritarian_right,300
+political_compass_chat_modes.png,Gemma 4B Chat,base,300
+political_compass_chat_modes.png,Gemma 4B Chat,centrism,300
+political_compass_chat_modes.png,Gemma 4B Chat,libertarian_left,300
+political_compass_chat_modes.png,Gemma 4B Chat,libertarian_right,300
+political_compass_chat_modes.png,Gemma 12B Chat,authoritarian_left,300
+political_compass_chat_modes.png,Gemma 12B Chat,authoritarian_right,300
+political_compass_chat_modes.png,Gemma 12B Chat,base,300
+political_compass_chat_modes.png,Gemma 12B Chat,centrism,300
+political_compass_chat_modes.png,Gemma 12B Chat,libertarian_left,300
+political_compass_chat_modes.png,Gemma 12B Chat,libertarian_right,300
+political_compass_chat_modes.png,Gemma 27B Chat,authoritarian_left,300
+political_compass_chat_modes.png,Gemma 27B Chat,authoritarian_right,300
+political_compass_chat_modes.png,Gemma 27B Chat,base,300
+political_compass_chat_modes.png,Gemma 27B Chat,centrism,300
+political_compass_chat_modes.png,Gemma 27B Chat,libertarian_left,300
+political_compass_chat_modes.png,Gemma 27B Chat,libertarian_right,300
+political_compass_chat_modes.png,Qwen 4B Chat no_think,authoritarian_left,300
+political_compass_chat_modes.png,Qwen 4B Chat no_think,authoritarian_right,300
+political_compass_chat_modes.png,Qwen 4B Chat no_think,base,300
+political_compass_chat_modes.png,Qwen 4B Chat no_think,centrism,300
+political_compass_chat_modes.png,Qwen 4B Chat no_think,libertarian_left,300
+political_compass_chat_modes.png,Qwen 4B Chat no_think,libertarian_right,300
+political_compass_chat_modes.png,Qwen 4B Chat think,authoritarian_left,300
+political_compass_chat_modes.png,Qwen 4B Chat think,authoritarian_right,300
+political_compass_chat_modes.png,Qwen 4B Chat think,base,300
+political_compass_chat_modes.png,Qwen 4B Chat think,centrism,300
+political_compass_chat_modes.png,Qwen 4B Chat think,libertarian_left,300
+political_compass_chat_modes.png,Qwen 4B Chat think,libertarian_right,300
+political_compass_chat_modes.png,Qwen 8B Chat no_think,authoritarian_left,300
+political_compass_chat_modes.png,Qwen 8B Chat no_think,authoritarian_right,300
+political_compass_chat_modes.png,Qwen 8B Chat no_think,base,300
+political_compass_chat_modes.png,Qwen 8B Chat no_think,centrism,300
+political_compass_chat_modes.png,Qwen 8B Chat no_think,libertarian_left,300
+political_compass_chat_modes.png,Qwen 8B Chat no_think,libertarian_right,300
+political_compass_chat_modes.png,Qwen 8B Chat think,authoritarian_left,300
+political_compass_chat_modes.png,Qwen 8B Chat think,authoritarian_right,300
+political_compass_chat_modes.png,Qwen 8B Chat think,base,300
+political_compass_chat_modes.png,Qwen 8B Chat think,centrism,300
+political_compass_chat_modes.png,Qwen 8B Chat think,libertarian_left,300
+political_compass_chat_modes.png,Qwen 8B Chat think,libertarian_right,300
+political_compass_chat_modes.png,Qwen 14B Chat no_think,authoritarian_left,300
+political_compass_chat_modes.png,Qwen 14B Chat no_think,authoritarian_right,300
+political_compass_chat_modes.png,Qwen 14B Chat no_think,base,300
+political_compass_chat_modes.png,Qwen 14B Chat no_think,centrism,300
+political_compass_chat_modes.png,Qwen 14B Chat no_think,libertarian_left,300
+political_compass_chat_modes.png,Qwen 14B Chat no_think,libertarian_right,300
+political_compass_chat_modes.png,Qwen 14B Chat think,authoritarian_left,300
+political_compass_chat_modes.png,Qwen 14B Chat think,authoritarian_right,300
+political_compass_chat_modes.png,Qwen 14B Chat think,base,300
+political_compass_chat_modes.png,Qwen 14B Chat think,centrism,300
+political_compass_chat_modes.png,Qwen 14B Chat think,libertarian_left,300
+political_compass_chat_modes.png,Qwen 14B Chat think,libertarian_right,300
+political_compass_chat_modes.png,Qwen 32B Chat no_think,authoritarian_left,300
+political_compass_chat_modes.png,Qwen 32B Chat no_think,authoritarian_right,300
+political_compass_chat_modes.png,Qwen 32B Chat no_think,base,300
+political_compass_chat_modes.png,Qwen 32B Chat no_think,centrism,300
+political_compass_chat_modes.png,Qwen 32B Chat no_think,libertarian_left,300
+political_compass_chat_modes.png,Qwen 32B Chat no_think,libertarian_right,300
+political_compass_chat_modes.png,Qwen 32B Chat think,authoritarian_left,300
+political_compass_chat_modes.png,Qwen 32B Chat think,authoritarian_right,300
+political_compass_chat_modes.png,Qwen 32B Chat think,base,300
+political_compass_chat_modes.png,Qwen 32B Chat think,centrism,300
+political_compass_chat_modes.png,Qwen 32B Chat think,libertarian_left,300
+political_compass_chat_modes.png,Qwen 32B Chat think,libertarian_right,300
+political_compass_mcq_vs_chat_english.png,Gemma 1B MCQ,authoritarian_left,63
+political_compass_mcq_vs_chat_english.png,Gemma 1B MCQ,authoritarian_right,63
+political_compass_mcq_vs_chat_english.png,Gemma 1B MCQ,base,63
+political_compass_mcq_vs_chat_english.png,Gemma 1B MCQ,centrism,63
+political_compass_mcq_vs_chat_english.png,Gemma 1B MCQ,libertarian_left,63
+political_compass_mcq_vs_chat_english.png,Gemma 1B MCQ,libertarian_right,63
+political_compass_mcq_vs_chat_english.png,Gemma 1B Chat,authoritarian_left,300
+political_compass_mcq_vs_chat_english.png,Gemma 1B Chat,authoritarian_right,300
+political_compass_mcq_vs_chat_english.png,Gemma 1B Chat,base,300
+political_compass_mcq_vs_chat_english.png,Gemma 1B Chat,centrism,300
+political_compass_mcq_vs_chat_english.png,Gemma 1B Chat,libertarian_left,300
+political_compass_mcq_vs_chat_english.png,Gemma 1B Chat,libertarian_right,300
+political_compass_mcq_vs_chat_english.png,Gemma 4B MCQ,authoritarian_left,63
+political_compass_mcq_vs_chat_english.png,Gemma 4B MCQ,authoritarian_right,63
+political_compass_mcq_vs_chat_english.png,Gemma 4B MCQ,base,63
+political_compass_mcq_vs_chat_english.png,Gemma 4B MCQ,centrism,63
+political_compass_mcq_vs_chat_english.png,Gemma 4B MCQ,libertarian_left,63
+political_compass_mcq_vs_chat_english.png,Gemma 4B MCQ,libertarian_right,63
+political_compass_mcq_vs_chat_english.png,Gemma 4B Chat,authoritarian_left,300
+political_compass_mcq_vs_chat_english.png,Gemma 4B Chat,authoritarian_right,300
+political_compass_mcq_vs_chat_english.png,Gemma 4B Chat,base,300
+political_compass_mcq_vs_chat_english.png,Gemma 4B Chat,centrism,300
+political_compass_mcq_vs_chat_english.png,Gemma 4B Chat,libertarian_left,300
+political_compass_mcq_vs_chat_english.png,Gemma 4B Chat,libertarian_right,300
+political_compass_mcq_vs_chat_english.png,Gemma 12B MCQ,authoritarian_left,63
+political_compass_mcq_vs_chat_english.png,Gemma 12B MCQ,authoritarian_right,63
+political_compass_mcq_vs_chat_english.png,Gemma 12B MCQ,base,63
+political_compass_mcq_vs_chat_english.png,Gemma 12B MCQ,centrism,63
+political_compass_mcq_vs_chat_english.png,Gemma 12B MCQ,libertarian_left,63
+political_compass_mcq_vs_chat_english.png,Gemma 12B MCQ,libertarian_right,63
+political_compass_mcq_vs_chat_english.png,Gemma 12B Chat,authoritarian_left,300
+political_compass_mcq_vs_chat_english.png,Gemma 12B Chat,authoritarian_right,300
+political_compass_mcq_vs_chat_english.png,Gemma 12B Chat,base,300
+political_compass_mcq_vs_chat_english.png,Gemma 12B Chat,centrism,300
+political_compass_mcq_vs_chat_english.png,Gemma 12B Chat,libertarian_left,300
+political_compass_mcq_vs_chat_english.png,Gemma 12B Chat,libertarian_right,300
+political_compass_mcq_vs_chat_english.png,Gemma 27B MCQ,authoritarian_left,63
+political_compass_mcq_vs_chat_english.png,Gemma 27B MCQ,authoritarian_right,63
+political_compass_mcq_vs_chat_english.png,Gemma 27B MCQ,base,63
+political_compass_mcq_vs_chat_english.png,Gemma 27B MCQ,centrism,63
+political_compass_mcq_vs_chat_english.png,Gemma 27B MCQ,libertarian_left,63
+political_compass_mcq_vs_chat_english.png,Gemma 27B MCQ,libertarian_right,63
+political_compass_mcq_vs_chat_english.png,Gemma 27B Chat,authoritarian_left,300
+political_compass_mcq_vs_chat_english.png,Gemma 27B Chat,authoritarian_right,300
+political_compass_mcq_vs_chat_english.png,Gemma 27B Chat,base,300
+political_compass_mcq_vs_chat_english.png,Gemma 27B Chat,centrism,300
+political_compass_mcq_vs_chat_english.png,Gemma 27B Chat,libertarian_left,300
+political_compass_mcq_vs_chat_english.png,Gemma 27B Chat,libertarian_right,300
+political_compass_mcq_vs_chat_english.png,Qwen 4B MCQ,authoritarian_left,63
+political_compass_mcq_vs_chat_english.png,Qwen 4B MCQ,authoritarian_right,63
+political_compass_mcq_vs_chat_english.png,Qwen 4B MCQ,base,63
+political_compass_mcq_vs_chat_english.png,Qwen 4B MCQ,centrism,63
+political_compass_mcq_vs_chat_english.png,Qwen 4B MCQ,libertarian_left,63
+political_compass_mcq_vs_chat_english.png,Qwen 4B MCQ,libertarian_right,63
+political_compass_mcq_vs_chat_english.png,Qwen 4B Chat no_think,authoritarian_left,300
+political_compass_mcq_vs_chat_english.png,Qwen 4B Chat no_think,authoritarian_right,300
+political_compass_mcq_vs_chat_english.png,Qwen 4B Chat no_think,base,300
+political_compass_mcq_vs_chat_english.png,Qwen 4B Chat no_think,centrism,300
+political_compass_mcq_vs_chat_english.png,Qwen 4B Chat no_think,libertarian_left,300
+political_compass_mcq_vs_chat_english.png,Qwen 4B Chat no_think,libertarian_right,300
+political_compass_mcq_vs_chat_english.png,Qwen 4B Chat think,authoritarian_left,300
+political_compass_mcq_vs_chat_english.png,Qwen 4B Chat think,authoritarian_right,300
+political_compass_mcq_vs_chat_english.png,Qwen 4B Chat think,base,300
+political_compass_mcq_vs_chat_english.png,Qwen 4B Chat think,centrism,300
+political_compass_mcq_vs_chat_english.png,Qwen 4B Chat think,libertarian_left,300
+political_compass_mcq_vs_chat_english.png,Qwen 4B Chat think,libertarian_right,300
+political_compass_mcq_vs_chat_english.png,Qwen 8B MCQ,authoritarian_left,63
+political_compass_mcq_vs_chat_english.png,Qwen 8B MCQ,authoritarian_right,63
+political_compass_mcq_vs_chat_english.png,Qwen 8B MCQ,base,63
+political_compass_mcq_vs_chat_english.png,Qwen 8B MCQ,centrism,63
+political_compass_mcq_vs_chat_english.png,Qwen 8B MCQ,libertarian_left,63
+political_compass_mcq_vs_chat_english.png,Qwen 8B MCQ,libertarian_right,63
+political_compass_mcq_vs_chat_english.png,Qwen 8B Chat no_think,authoritarian_left,300
+political_compass_mcq_vs_chat_english.png,Qwen 8B Chat no_think,authoritarian_right,300
+political_compass_mcq_vs_chat_english.png,Qwen 8B Chat no_think,base,300
+political_compass_mcq_vs_chat_english.png,Qwen 8B Chat no_think,centrism,300
+political_compass_mcq_vs_chat_english.png,Qwen 8B Chat no_think,libertarian_left,300
+political_compass_mcq_vs_chat_english.png,Qwen 8B Chat no_think,libertarian_right,300
+political_compass_mcq_vs_chat_english.png,Qwen 8B Chat think,authoritarian_left,300
+political_compass_mcq_vs_chat_english.png,Qwen 8B Chat think,authoritarian_right,300
+political_compass_mcq_vs_chat_english.png,Qwen 8B Chat think,base,300
+political_compass_mcq_vs_chat_english.png,Qwen 8B Chat think,centrism,300
+political_compass_mcq_vs_chat_english.png,Qwen 8B Chat think,libertarian_left,300
+political_compass_mcq_vs_chat_english.png,Qwen 8B Chat think,libertarian_right,300
+political_compass_mcq_vs_chat_english.png,Qwen 14B MCQ,authoritarian_left,63
+political_compass_mcq_vs_chat_english.png,Qwen 14B MCQ,authoritarian_right,63
+political_compass_mcq_vs_chat_english.png,Qwen 14B MCQ,base,63
+political_compass_mcq_vs_chat_english.png,Qwen 14B MCQ,centrism,63
+political_compass_mcq_vs_chat_english.png,Qwen 14B MCQ,libertarian_left,63
+political_compass_mcq_vs_chat_english.png,Qwen 14B MCQ,libertarian_right,63
+political_compass_mcq_vs_chat_english.png,Qwen 14B Chat no_think,authoritarian_left,300
+political_compass_mcq_vs_chat_english.png,Qwen 14B Chat no_think,authoritarian_right,300
+political_compass_mcq_vs_chat_english.png,Qwen 14B Chat no_think,base,300
+political_compass_mcq_vs_chat_english.png,Qwen 14B Chat no_think,centrism,300
+political_compass_mcq_vs_chat_english.png,Qwen 14B Chat no_think,libertarian_left,300
+political_compass_mcq_vs_chat_english.png,Qwen 14B Chat no_think,libertarian_right,300
+political_compass_mcq_vs_chat_english.png,Qwen 14B Chat think,authoritarian_left,300
+political_compass_mcq_vs_chat_english.png,Qwen 14B Chat think,authoritarian_right,300
+political_compass_mcq_vs_chat_english.png,Qwen 14B Chat think,base,300
+political_compass_mcq_vs_chat_english.png,Qwen 14B Chat think,centrism,300
+political_compass_mcq_vs_chat_english.png,Qwen 14B Chat think,libertarian_left,300
+political_compass_mcq_vs_chat_english.png,Qwen 14B Chat think,libertarian_right,300
+political_compass_mcq_vs_chat_english.png,Qwen 32B MCQ,authoritarian_left,63
+political_compass_mcq_vs_chat_english.png,Qwen 32B MCQ,authoritarian_right,63
+political_compass_mcq_vs_chat_english.png,Qwen 32B MCQ,base,63
+political_compass_mcq_vs_chat_english.png,Qwen 32B MCQ,centrism,63
+political_compass_mcq_vs_chat_english.png,Qwen 32B MCQ,libertarian_left,63
+political_compass_mcq_vs_chat_english.png,Qwen 32B MCQ,libertarian_right,63
+political_compass_mcq_vs_chat_english.png,Qwen 32B Chat no_think,authoritarian_left,300
+political_compass_mcq_vs_chat_english.png,Qwen 32B Chat no_think,authoritarian_right,300
+political_compass_mcq_vs_chat_english.png,Qwen 32B Chat no_think,base,300
+political_compass_mcq_vs_chat_english.png,Qwen 32B Chat no_think,centrism,300
+political_compass_mcq_vs_chat_english.png,Qwen 32B Chat no_think,libertarian_left,300
+political_compass_mcq_vs_chat_english.png,Qwen 32B Chat no_think,libertarian_right,300
+political_compass_mcq_vs_chat_english.png,Qwen 32B Chat think,authoritarian_left,300
+political_compass_mcq_vs_chat_english.png,Qwen 32B Chat think,authoritarian_right,300
+political_compass_mcq_vs_chat_english.png,Qwen 32B Chat think,base,300
+political_compass_mcq_vs_chat_english.png,Qwen 32B Chat think,centrism,300
+political_compass_mcq_vs_chat_english.png,Qwen 32B Chat think,libertarian_left,300
+political_compass_mcq_vs_chat_english.png,Qwen 32B Chat think,libertarian_right,300

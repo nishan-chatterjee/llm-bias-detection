@@ -17,8 +17,9 @@ The repository does **not** contain model weights, local model caches, the
 generated Political Compass scorer (`.npz`), manuscript sources, stance
 experiments, or LLM-generated research annotations. Political Compass
 proposition files are also excluded from Git pending redistribution clearance.
-Hate-speech raw output slots remain unpopulated until the corresponding data,
-corpus checksum, and exact prompt file are supplied by the collaborators.
+Hate-speech item predictions from the collaborator handoff are packaged in the
+private companion dataset. The exact prompt file, source statements, assembled
+corpus checksum, and component-licence review remain outstanding.
 
 ## Layout
 
@@ -70,8 +71,9 @@ redistributed. Users remain responsible for the original Political Compass
 terms and all upstream model licences.
 
 The IBM sentiment task includes its 30-row test-topic extract with upstream
-attribution. The hate-speech corpus contains severe language and is not bundled
-until the exact assembled split and component licences have been confirmed.
+attribution. Hate-speech prediction records are bundled privately without
+source text; the exact assembled corpus is not bundled until its checksum and
+component licences have been confirmed.
 
 ## Scope of the qualitative diagnostics
 

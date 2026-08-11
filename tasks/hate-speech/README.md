@@ -10,10 +10,21 @@ and covers the eight primary Gemma 3 and Qwen3 checkpoints.
 
 ## Current release status
 
-The executable runner, original historical runner, complete 14,400-row
-configuration aggregate, and reproducible factor-sensitivity analysis are
-included. The raw model CSVs and the exact 1,332-item corpus are awaiting the
-colleague handoff and therefore are not fabricated or silently replaced.
+The executable runner, historical provenance runners, supplied 14,400-row
+design, complete configuration aggregate, item-output converter, and
+reproducible factor-sensitivity analysis are included. The colleague handoff
+contains eight complete wide model CSVs: 1,800 configurations per model and
+1,332 target-specific item predictions per configuration. Those large CSVs
+remain outside Git and are converted to long Parquet for the private companion
+Dataset repository.
+
+The handoff does **not** contain the source statements, exact prompt JSON, raw
+vocabulary logits, or assembled corpus file. The historical results contain
+only candidate-normalized probabilities for literal `True` and `False`, gold
+labels, target labels, and source metadata. These limitations are preserved in
+the released schema rather than inferred or filled in. Because the historical
+softmax values were computed/stored at bf16 precision, candidate-pair sums can
+differ from one by at most 0.001953125 in the supplied files.
 
 The historical anonymized package also says that its hate prompt JSON is
 shipped, but the referenced file is actually a Political Compass prompt file:
@@ -26,13 +37,14 @@ Expected local files:
 
 ```text
 tasks/hate-speech/data/
-├── corpus/english.jsonl   # exact archived 1,332-item experiment corpus
+├── corpus/english.jsonl   # 13,320 target-specific rows: 1,332 per target
 └── prompts/english.json   # five contexts, ten instructions, persona templates
 ```
 
 The corpus schema is one JSON object per line with `text`, `hate`,
 `target_groups`, `dataset`, and `grouping`. The first target group must be one
-of the ten groups named in `run_hate_speech.py`.
+of the ten groups named in `run_hate_speech.py`. The completed run selected one
+target per configuration and scored its 1,332 corresponding rows.
 
 ## Run
 
@@ -50,9 +62,22 @@ resumable JSONL with both selected-token logits and candidate-only softmax
 probabilities. The untouched historical wide-CSV runner is retained at
 `legacy/hate-speech/run_hate_speech_original.py`.
 
+The completed historical CSVs can be normalized with:
+
+```bash
+python tasks/hate-speech/analysis/convert_historical_results.py \
+  --raw /path/to/output_hate_speech/results_hs \
+  --design /path/to/output_hate_speech/experimental_design_hs.csv \
+  --output /tmp/hate-speech-parquet
+```
+
+The converter uses a one-based `item_index`. It does not expose the historical
+header's `q...` prefixes as question IDs: the header came from the first
+target-specific row, while subsequent targets were appended positionally.
+
 ## Data source
 
-The archived code describes the corpus as the HATE-IDENTITY split associated
+The archived code describes the corpus as target-specific HATE-IDENTITY data associated
 with Yoder et al., *How Hate Speech Varies by Target Identity: A Computational
 Analysis* (CoNLL 2022): <https://aclanthology.org/2022.conll-1.3/>. Before a
 public data upload, verify the exact assembled split, its component-dataset
@@ -75,3 +100,6 @@ components are fitted within persona conditions; the persona-condition term is
 tested separately in one model-level fit. These values describe score
 sensitivity under this design and do not establish that a model family, size,
 or political group has an intrinsic hate-speech tendency.
+
+Regenerating the aggregate from the supplied eight CSVs reproduces all 14,400
+rows and both stored metrics exactly (maximum absolute difference 0).

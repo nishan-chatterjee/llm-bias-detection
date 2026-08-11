@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MCQ Pipeline — Compact</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  body { margin:0; padding:24px; background:#fff; font-family:'Inter',system-ui,sans-serif; display:flex; justify-content:center; }
+  svg { max-width:100%; height:auto; }
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 540" width="1100" height="540">
+  <defs>
+    <marker id="a-p" viewBox="0 0 10 8" refX="10" refY="4" markerWidth="7" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,4 L0,8 Z" fill="#7c3aed"/></marker>
+    <marker id="a-b" viewBox="0 0 10 8" refX="10" refY="4" markerWidth="7" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,4 L0,8 Z" fill="#2563eb"/></marker>
+    <marker id="a-a" viewBox="0 0 10 8" refX="10" refY="4" markerWidth="7" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,4 L0,8 Z" fill="#d97706"/></marker>
+    <marker id="a-e" viewBox="0 0 10 8" refX="10" refY="4" markerWidth="7" markerHeight="5" orient="auto-start-reverse"><path d="M0,0 L10,4 L0,8 Z" fill="#059669"/></marker>
+    <filter id="sh" x="-2%" y="-4%" width="104%" height="110%"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.07" flood-color="#000"/></filter>
+  </defs>
+
+  <!-- ===== TITLE ===== -->
+  <text x="550" y="28" text-anchor="middle" font-size="20" font-weight="800" fill="#1e1b4b" letter-spacing="-0.03em">MCQ Pipeline — Direct Logit Prediction</text>
+
+  <!-- ===== ROW 1: INVESTIGATING ===== -->
+  <g transform="translate(0, 44)">
+    <text x="22" y="14" font-size="11" font-weight="800" fill="#5b21b6" letter-spacing="0.05em">INVESTIGATING</text>
+    <rect x="16" y="20" width="1068" height="54" rx="10" fill="#faf7ff" stroke="#c4b5fd" stroke-width="1.3"/>
+
+    <!-- Model: 2-line layout -->
+    <g transform="translate(22, 24)">
+      <rect width="210" height="46" rx="8" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.2" filter="url(#sh)"/>
+      <text x="12" y="19" font-size="13" font-weight="700" fill="#5b21b6">Model</text>
+      <rect x="58" y="6" width="28" height="16" rx="8" fill="#7c3aed"/><text x="72" y="18" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">8</text>
+      <text x="12" y="37" font-size="10.5" fill="#6b7280">Gemma-3 · Qwen3</text>
+    </g>
+    <line x1="237" y1="47" x2="260" y2="47" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#a-p)"/>
+
+    <!-- Ideology -->
+    <g transform="translate(264, 24)">
+      <rect width="210" height="46" rx="8" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.2" filter="url(#sh)"/>
+      <text x="12" y="19" font-size="13" font-weight="700" fill="#5b21b6">Ideology</text>
+      <rect x="78" y="6" width="24" height="16" rx="8" fill="#7c3aed"/><text x="90" y="18" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">6</text>
+      <text x="12" y="37" font-size="10.5" fill="#6b7280">Base + 5 Steered Personas</text>
+    </g>
+    <line x1="479" y1="47" x2="502" y2="47" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#a-p)"/>
+
+    <!-- Quantization -->
+    <g transform="translate(506, 24)">
+      <rect width="190" height="46" rx="8" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.2" filter="url(#sh)"/>
+      <text x="12" y="19" font-size="13" font-weight="700" fill="#5b21b6">Quantization</text>
+      <rect x="110" y="6" width="24" height="16" rx="8" fill="#7c3aed"/><text x="122" y="18" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">3</text>
+      <text x="12" y="37" font-size="10.5" fill="#6b7280">bf16 · 8-bit · 4-bit</text>
+    </g>
+    <line x1="701" y1="47" x2="724" y2="47" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#a-p)"/>
+
+    <!-- 62 Questions -->
+    <g transform="translate(728, 24)">
+      <rect width="350" height="46" rx="8" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="1.2" filter="url(#sh)"/>
+      <text x="12" y="19" font-size="13" font-weight="700" fill="#5b21b6">62 Questions</text>
+      <text x="12" y="37" font-size="10.5" fill="#6b7280">Political Compass Test · Direct Logits</text>
+    </g>
+  </g>
+
+  <!-- ===== ARROW DOWN ===== -->
+  <line x1="550" y1="118" x2="550" y2="134" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#a-b)"/>
+
+  <!-- ===== ROW 2: LHS (label + badge only, no subtexts) ===== -->
+  <g transform="translate(0, 140)">
+    <text x="22" y="14" font-size="11" font-weight="800" fill="#1d4ed8" letter-spacing="0.05em">LHS</text>
+    <text x="48" y="14" font-size="11" fill="#3b82f6" font-weight="600">8 Dimensions · 300 Samples per block</text>
+    <rect x="16" y="20" width="760" height="42" rx="10" fill="#f8fbff" stroke="#93c5fd" stroke-width="1.3"/>
+
+    <g transform="translate(22, 24)">
+      <rect width="130" height="34" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.2" filter="url(#sh)"/>
+      <text x="12" y="23" font-size="12" font-weight="700" fill="#1e40af">Language</text>
+      <rect x="96" y="7" width="26" height="16" rx="8" fill="#2563eb"/><text x="109" y="19" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">14</text>
+    </g>
+
+    <g transform="translate(164, 24)">
+      <rect width="120" height="34" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.2" filter="url(#sh)"/>
+      <text x="12" y="23" font-size="12" font-weight="700" fill="#1e40af">Framing</text>
+      <rect x="86" y="7" width="26" height="16" rx="8" fill="#2563eb"/><text x="99" y="19" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">6</text>
+    </g>
+
+    <g transform="translate(296, 24)">
+      <rect width="140" height="34" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.2" filter="url(#sh)"/>
+      <text x="12" y="23" font-size="12" font-weight="700" fill="#1e40af">Instruction</text>
+      <rect x="100" y="7" width="32" height="16" rx="8" fill="#2563eb"/><text x="116" y="19" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">2×5</text>
+    </g>
+
+    <g transform="translate(448, 24)">
+      <rect width="130" height="34" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.2" stroke-dasharray="5 3" filter="url(#sh)"/>
+      <text x="12" y="23" font-size="12" font-weight="700" fill="#1e40af">Persona</text>
+      <rect x="88" y="7" width="34" height="16" rx="8" fill="#2563eb"/><text x="105" y="19" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">2×5</text>
+    </g>
+
+    <g transform="translate(590, 24)">
+      <rect width="180" height="34" rx="8" fill="#eff6ff" stroke="#93c5fd" stroke-width="1.2" filter="url(#sh)"/>
+      <text x="12" y="23" font-size="12" font-weight="700" fill="#1e40af">Answer Format</text>
+      <rect x="136" y="7" width="34" height="16" rx="8" fill="#2563eb"/><text x="153" y="19" text-anchor="middle" font-size="9" font-weight="700" fill="#fff">4×4</text>
+    </g>
+
+    <text x="806" y="46" font-size="10" fill="#93c5fd" font-weight="500">≤ 134,400 → 300</text>
+  </g>
+
+  <!-- ===== ARROW DOWN ===== -->
+  <line x1="550" y1="202" x2="550" y2="218" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#a-a)"/>
+
+  <!-- ===== ROW 3: PROMPT COMPOSITION ===== -->
+  <g transform="translate(0, 224)">
+    <text x="22" y="14" font-size="11" font-weight="800" fill="#92400e" letter-spacing="0.05em">PROMPT COMPOSITION</text>
+
+    <!-- Left: stacked compact label-only blocks -->
+    <g transform="translate(22, 26)">
+      <rect width="170" height="30" rx="6" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.2"/>
+      <rect x="0" y="0" width="5" height="30" rx="3 0 0 3" fill="#f59e0b"/>
+      <text x="92" y="20" text-anchor="middle" font-size="12" font-weight="700" fill="#92400e">Context Block</text>
+    </g>
+    <text x="107" y="69" text-anchor="middle" font-size="11" fill="#d97706" font-weight="600">+</text>
+    <g transform="translate(22, 72)">
+      <rect width="170" height="30" rx="6" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.2" stroke-dasharray="5 3"/>
+      <rect x="0" y="0" width="5" height="30" rx="3 0 0 3" fill="#fbbf24"/>
+      <text x="92" y="20" text-anchor="middle" font-size="12" font-weight="700" fill="#92400e">Persona Block</text>
+    </g>
+    <text x="107" y="115" text-anchor="middle" font-size="11" fill="#d97706" font-weight="600">+</text>
+    <g transform="translate(22, 118)">
+      <rect width="170" height="30" rx="6" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.2"/>
+      <rect x="0" y="0" width="5" height="30" rx="3 0 0 3" fill="#f59e0b"/>
+      <text x="92" y="20" text-anchor="middle" font-size="12" font-weight="700" fill="#92400e">Instruction + Question</text>
+    </g>
+
+    <!-- Arrow to example -->
+    <line x1="198" y1="96" x2="230" y2="96" stroke="#d97706" stroke-width="1.5" marker-end="url(#a-a)"/>
+
+    <!-- Right: concrete example -->
+    <g transform="translate(234, 0)">
+      <rect width="844" height="188" rx="10" fill="#fff" stroke="#e5e7eb" stroke-width="1" filter="url(#sh)"/>
+      <rect x="0" y="0" width="844" height="24" rx="10 10 0 0" fill="#fef3c7"/>
+      <text x="422" y="17" text-anchor="middle" font-size="10.5" font-weight="700" fill="#92400e">Example Assembled Prompt</text>
+
+      <text x="18" y="46" font-size="13" fill="#78716c" font-family="'Courier New',monospace" font-style="italic">// Framing: psychometric assessment</text>
+      <text x="18" y="64" font-size="13" fill="#44403c" font-family="'Courier New',monospace">You are taking a psychometric assessment. Answer honestly.</text>
+
+      <text x="18" y="86" font-size="13" fill="#78716c" font-family="'Courier New',monospace" font-style="italic">// Persona: Libertarian-Left (rich description)</text>
+      <text x="18" y="104" font-size="13" fill="#44403c" font-family="'Courier New',monospace">You are a person who values personal freedom and economic equality …</text>
+
+      <text x="18" y="126" font-size="13" fill="#78716c" font-family="'Courier New',monospace" font-style="italic">// Instruction: question-first, wording variant 2</text>
+      <text x="18" y="144" font-size="13" fill="#44403c" font-family="'Courier New',monospace">Read the statement and select the best-matching option.</text>
+
+      <text x="18" y="168" font-size="14" fill="#1e293b" font-family="'Courier New',monospace" font-weight="700">"If economic globalisation is inevitable, it should serve humanity…"</text>
+      <text x="18" y="184" font-size="13" fill="#1e293b" font-family="'Courier New',monospace">A. Strongly Agree   B. Agree   C. Disagree   D. Strongly Disagree</text>
+    </g>
+  </g>
+
+  <!-- ===== ARROW DOWN ===== -->
+  <line x1="550" y1="430" x2="550" y2="448" stroke="#d97706" stroke-width="1.5" stroke-dasharray="4 2" marker-end="url(#a-e)"/>
+
+  <!-- ===== ROW 4: PREDICT (single statement) ===== -->
+  <g transform="translate(22, 456)">
+    <rect x="0" y="0" width="1056" height="40" rx="10" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1.5" filter="url(#sh)"/>
+    <text x="14" y="16" font-size="11" font-weight="800" fill="#065f46" letter-spacing="0.05em">PREDICT</text>
+    <text x="84" y="16" font-size="12.5" fill="#065f46" font-weight="600">Single forward pass</text>
+    <text x="234" y="16" font-size="12.5" fill="#6b7280">→ extract logits for candidate keys</text>
+    <text x="510" y="16" font-size="12.5" fill="#6b7280">→ softmax →</text>
+    <text x="608" y="16" font-size="12.5" font-weight="700" fill="#065f46">P(option)</text>
+    <text x="14" y="33" font-size="10" fill="#9ca3af">No generation, no sampling — deterministic probability distribution over 4 Likert options</text>
+  </g>
+
+  <text x="1078" y="536" text-anchor="end" font-size="9" fill="#cbd5e1">LHS seed=42, reused across all blocks</text>
+</svg>
+</body>
+</html>
