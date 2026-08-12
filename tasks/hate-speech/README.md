@@ -75,6 +75,20 @@ The converter uses a one-based `item_index`. It does not expose the historical
 header's `q...` prefixes as question IDs: the header came from the first
 target-specific row, while subsequent targets were appended positionally.
 
+The complete release notebook is
+`analysis/notebooks/01_hate_speech_analysis_primary_models.ipynb`. Generate its
+compact item-level metrics from the companion Dataset Parquets with:
+
+```bash
+python tasks/hate-speech/analysis/summarize_item_predictions.py \
+  --input /path/to/hf-download/data/hate_speech \
+  --output tasks/hate-speech/analysis/data
+```
+
+The historical notebook combined hate speech with a separate offensive-speech
+experiment. It is preserved under `legacy/hate-speech/` with its rendered
+outputs, but the offensive-speech cells are not canonical release evidence.
+
 ## Data source
 
 The archived code describes the corpus as target-specific HATE-IDENTITY data associated

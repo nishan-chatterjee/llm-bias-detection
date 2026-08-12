@@ -9,6 +9,7 @@ import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import seaborn as sns
 
 
 HERE = Path(__file__).resolve().parent
@@ -102,7 +103,7 @@ def plot_centroid_grid(
 ):
     nrows = int(np.ceil(len(panels) / ncols))
     fig, axes = plt.subplots(nrows, ncols, figsize=(3.3 * ncols, 3.1 * nrows), squeeze=False)
-    for ax, (panel_key, panel_label) in zip(axes.flat, panels):
+    for panel_index, (ax, (panel_key, panel_label)) in enumerate(zip(axes.flat, panels)):
         model, protocol = panel_key.split("|", 1)
         sub = frame[(frame[model_col] == model) & (frame[protocol_col] == protocol)]
         draw_compass_background(ax)
@@ -110,6 +111,31 @@ def plot_centroid_grid(
             ide = sub[sub["ideology"] == ideology]
             if ide.empty:
                 continue
+            ax.scatter(
+                ide["economic"], ide["social"], s=7,
+                color=IDEOLOGY_COLORS[ideology], alpha=0.10,
+                edgecolor="none", rasterized=True,
+            )
+            if len(ide) >= 3:
+                values = ide[["economic", "social"]].dropna().to_numpy(float)
+                covariance = np.cov(values, rowvar=False)
+                if np.isfinite(covariance).all():
+                    eigvals, eigvecs = np.linalg.eigh(covariance)
+                    eigvals = np.maximum(eigvals, 0)
+                    order = eigvals.argsort()[::-1]
+                    eigvals, eigvecs = eigvals[order], eigvecs[:, order]
+                    angle = np.degrees(np.arctan2(eigvecs[1, 0], eigvecs[0, 0]))
+                    ellipse = patches.Ellipse(
+                        (values[:, 0].mean(), values[:, 1].mean()),
+                        width=2 * np.sqrt(eigvals[0]),
+                        height=2 * np.sqrt(eigvals[1]),
+                        angle=angle,
+                        fill=False,
+                        color=IDEOLOGY_COLORS[ideology],
+                        linewidth=0.8,
+                        alpha=0.75,
+                    )
+                    ax.add_patch(ellipse)
             ax.scatter(
                 ide["economic"].mean(),
                 ide["social"].mean(),
@@ -121,8 +147,9 @@ def plot_centroid_grid(
                 label=IDEOLOGY_LABELS[ideology],
             )
         ax.set_title(panel_label, fontsize=10)
-        ax.set_xlabel("Economic: left ← → right")
-        ax.set_ylabel("Social: libertarian ← → authoritarian")
+        row, column = divmod(panel_index, ncols)
+        ax.set_xlabel("Economic axis" if row == nrows - 1 else "")
+        ax.set_ylabel("Social axis" if column == 0 else "")
     for ax in axes.flat[len(panels) :]:
         ax.axis("off")
     handles, labels = axes.flat[0].get_legend_handles_labels()
@@ -164,3 +191,66 @@ def qwen_think_outcomes(chat: pd.DataFrame) -> pd.DataFrame:
         .rename("configurations")
         .reset_index()
     )
+
+
+def descriptive_factor_spread(
+    frame: pd.DataFrame,
+    score_columns: tuple[str, ...],
+    factors: tuple[str, ...],
+    model_columns: tuple[str, ...] = ("base_model", "protocol"),
+) -> pd.DataFrame:
+    """Return within-persona RMS between-level spread for released tables.
+
+    This is deliberately descriptive.  For each method, persona, score and
+    factor, it measures the weighted spread of factor-level means around the
+    persona mean and then pools those spreads over personas.  It does not
+    assume that factors are causal or mutually independent.
+    """
+    rows = []
+    for keys, method in frame.groupby(list(model_columns), observed=True, dropna=False):
+        if not isinstance(keys, tuple):
+            keys = (keys,)
+        result = dict(zip(model_columns, keys))
+        for score in score_columns:
+            result[f"{score}: total SD"] = method[score].std(ddof=0)
+            result[f"{score}: persona SD"] = (
+                method.groupby("ideology", observed=True)[score].mean().std(ddof=0)
+            )
+            for factor in factors:
+                ss = 0.0
+                n = 0
+                for _, subset in method.groupby("ideology", observed=True):
+                    means = subset.groupby(factor, observed=True, dropna=False)[score].mean()
+                    counts = subset.groupby(factor, observed=True, dropna=False)[score].count()
+                    grand = subset[score].mean()
+                    ss += float((((means - grand) ** 2) * counts).sum())
+                    n += int(counts.sum())
+                result[f"{score}: {factor}"] = np.sqrt(ss / n) if n else np.nan
+        rows.append(result)
+    return pd.DataFrame(rows)
+
+
+def plot_sensitivity_heatmap(
+    table: pd.DataFrame,
+    value_prefix: str,
+    index: list[str],
+    title: str,
+    figsize: tuple[float, float] = (13, 6),
+):
+    """Plot one score's columns from :func:`descriptive_factor_spread`."""
+    columns = [column for column in table if column.startswith(value_prefix + ":")]
+    display = table.set_index(index)[columns]
+    if index == ["base_model", "protocol"]:
+        desired = [
+            *((model, "standard") for model in GEMMA_MODELS),
+            *((model, protocol) for model in QWEN_MODELS for protocol in ("no_think", "think")),
+        ]
+        display = display.reindex(pd.MultiIndex.from_tuples(desired, names=index)).dropna(how="all")
+    display.columns = [column.split(": ", 1)[1].replace("_", " ").title() for column in columns]
+    fig, ax = plt.subplots(figsize=figsize)
+    sns.heatmap(display, annot=True, fmt=".2f", cmap="viridis", ax=ax)
+    ax.set_title(title)
+    ax.set_xlabel("Descriptive SD-sized component")
+    ax.set_ylabel(" / ".join(index))
+    fig.tight_layout()
+    return fig

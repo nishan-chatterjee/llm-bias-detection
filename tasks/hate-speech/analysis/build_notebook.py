@@ -1,101 +1,180 @@
 #!/usr/bin/env python3
-"""Build the compact hate-speech aggregate analysis notebook."""
+"""Build the complete released hate-speech analysis notebook."""
 
 from pathlib import Path
-
+import textwrap
 import nbformat as nbf
 
 
-HERE = Path(__file__).resolve().parent
-OUT = HERE / "notebooks" / "01_hate_speech_factor_sensitivity.ipynb"
+HERE=Path(__file__).resolve().parent
+OUT=HERE/'notebooks'/'01_hate_speech_analysis_primary_models.ipynb'
 
 
-def main() -> None:
-    nb = nbf.v4.new_notebook()
-    nb["metadata"] = {
-        "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
-        "language_info": {"name": "python", "version": "3"},
+def md(text): return nbf.v4.new_markdown_cell(textwrap.dedent(text).strip())
+def code(text): return nbf.v4.new_code_cell(textwrap.dedent(text).strip())
+
+
+def main():
+    nb=nbf.v4.new_notebook()
+    nb['metadata']={
+        'kernelspec':{'display_name':'Python 3','language':'python','name':'python3'},
+        'language_info':{'name':'python','version':'3'},
     }
-    nb["cells"] = [
-        nbf.v4.new_markdown_cell(
-            """# Hate-speech configuration sensitivity
+    nb['cells']=[
+        md("""# Hate-speech analysis — primary models
 
-This notebook analyzes the released 14,400-row configuration aggregate. Raw
-item-level model outputs are pending the colleague handoff, so this notebook
-does not claim to reproduce item-level classification metrics.
+        This notebook analyzes the eight primary Gemma 3 IT and Qwen3
+        checkpoints. It uses compact summaries derived from 19,180,800 released
+        item predictions, plus the exact 14,400-row configuration aggregate.
 
-**Sensitive-content note:** the underlying corpus contains identity-targeted
-hate speech. This aggregate contains target-group labels but no source text."""
-        ),
-        nbf.v4.new_code_cell(
-            """from pathlib import Path
-import pandas as pd
-from IPython.display import Image, display
+        **Sensitive-content notice:** the source corpus contains identity-targeted
+        hate speech. The released Parquets do not contain source statements, but
+        they do contain target-group labels and source metadata."""),
+        code("""
+        from pathlib import Path
+        import matplotlib.pyplot as plt
+        import numpy as np
+        import pandas as pd
+        import seaborn as sns
+        from IPython.display import Image,display
 
-ANALYSIS = Path.cwd().parent if Path.cwd().name == "notebooks" else Path.cwd()
-if not (ANALYSIS / "data").exists():
-    ANALYSIS = Path.cwd() / "tasks" / "hate-speech" / "analysis"
-DATA = ANALYSIS / "data"
-FIGURES = ANALYSIS / "figures"
+        ANALYSIS=Path.cwd().parent if Path.cwd().name=='notebooks' else Path.cwd()
+        if not (ANALYSIS/'data').exists(): ANALYSIS=Path.cwd()/'tasks'/'hate-speech'/'analysis'
+        DATA=ANALYSIS/'data'; FIGURES=ANALYSIS/'figures'
+        scores=pd.read_csv(DATA/'hs_configuration_scores.csv')
+        sensitivity=pd.read_csv(DATA/'hs_factor_sensitivity.csv')
+        metrics=pd.read_csv(DATA/'hs_item_metrics_by_persona_target.csv')
+        calibration=pd.read_csv(DATA/'hs_calibration_by_model.csv')
+        model_order=['gemma-3-1b-it','gemma-3-4b-it','gemma-3-12b-it','gemma-3-27b-it',
+                     'Qwen3-4B','Qwen3-8B','Qwen3-14B','Qwen3-32B']
+        ideology_order=['base','centrism','libertarian_left','libertarian_right',
+                        'authoritarian_left','authoritarian_right']
+        sns.set_theme(style='whitegrid')
+        """),
+        md("""## Completeness and design
 
-scores = pd.read_csv(DATA / "hs_configuration_scores.csv")
-sensitivity = pd.read_csv(DATA / "hs_factor_sensitivity.csv")"""
-        ),
-        nbf.v4.new_markdown_cell(
-            """## Aggregate completeness
+        The design has 300 configurations per model/persona block. Each
+        configuration selects one of ten identity targets and scores 1,332
+        target-specific item positions. The historical CSV header was reused
+        positionally across targets, so `item_index` is a within-target position,
+        not a global question ID."""),
+        code("""
+        display(pd.Series({'configuration rows':len(scores),'models':scores.model.nunique(),
+                           'personas':scores.ideology.nunique(),'targets':scores.target.nunique(),
+                           'released item predictions':19_180_800}).to_frame('value'))
+        display(scores.groupby(['model','ideology'],observed=True).size().unstack())
+        assert len(scores)==8*6*300
+        assert scores.groupby(['model','ideology']).size().eq(300).all()
+        assert len(metrics)==8*6*10 and len(calibration)==8*10
+        """),
+        md("""## Configuration-level P(hate)
 
-The design has 300 sampled configurations for each of six persona conditions
-and eight models. Each row is already averaged over the items belonging to the
-configuration's sampled target group."""
-        ),
-        nbf.v4.new_code_cell(
-            """display(scores.head())
-display(scores.groupby("model").size().rename("configurations"))
-assert len(scores) == 8 * 6 * 300
-assert scores.groupby("model").size().eq(1800).all()
-assert scores["target"].nunique() == 10"""
-        ),
-        nbf.v4.new_markdown_cell(
-            """## What the sensitivity values mean
+        Each row below is a configuration mean over its 1,332 items. Differences
+        combine prompt sensitivity, persona assignment and the sampled target;
+        they are not statements about the prevalence of hate speech in a group."""),
+        code("""
+        scores['model_alias']=scores.model.str.split('/').str[-1]
+        config_summary=(scores.groupby(['model_alias','ideology'],observed=True)
+                        .agg(configurations=('mean_p_hate','size'),mean_p_hate=('mean_p_hate','mean'),
+                             sd_p_hate=('mean_p_hate','std'),mean_item_dispersion=('mean_item_dispersion','mean'))
+                        .reset_index())
+        display(config_summary.pivot(index='model_alias',columns='ideology',values='mean_p_hate')
+                .reindex(model_order).reindex(columns=ideology_order).round(3))
+        """),
+        md("""## Item-level classification performance
 
-`target` is a data-composition block because each configuration samples one
-identity target; it is not presented as a prompt manipulation. Within each
-persona condition, additive models estimate spread associated with persona
-wording, context wording, and instruction wording. `Ideology SD` is the spread
-between persona-condition means. `Intrinsic Blur` comes from mean `p(1-p)`
-across item probabilities, and `Residual Jitter` is unexplained
-configuration-level spread.
+        The historical run stores candidate-normalized probabilities for
+        literal `True` and `False`. At threshold 0.5, the table reports accuracy,
+        precision, recall and F1. These are classification diagnostics, not a
+        toxicity score for a persona or identity target."""),
+        code("""
+        overall=(metrics.groupby('model_alias',observed=True)
+                 .agg(n=('n','sum'),tp=('tp','sum'),tn=('tn','sum'),fp=('fp','sum'),fn=('fn','sum')))
+        overall['accuracy']=(overall.tp+overall.tn)/overall.n
+        overall['precision']=overall.tp/(overall.tp+overall.fp)
+        overall['recall']=overall.tp/(overall.tp+overall.fn)
+        overall['f1']=2*overall.precision*overall.recall/(overall.precision+overall.recall)
+        display(overall.reindex(model_order)[['n','accuracy','precision','recall','f1']].round(3))
+        """),
+        md("""## Performance by assigned persona
 
-The largest component differs by checkpoint. Instruction wording is especially
-large for Gemma 3 1B, whereas context or the persona-condition spread is larger
-for some other checkpoints. This supports prompt sensitivity and
-checkpoint-specific heterogeneity; it does not support a uniform size or
-family law."""
-        ),
-        nbf.v4.new_code_cell(
-            """columns = [
-    "model", "Mean P(Hate)", "Total Var SD", "Ideology SD",
-    "persona_combo_sd", "context_combo_sd", "instr_combo_sd",
-    "Intrinsic Blur", "Residual Jitter",
-]
-display(sensitivity[columns])
-display(Image(filename=str(FIGURES / "hate_speech_factor_sensitivity.png")))"""
-        ),
-        nbf.v4.new_markdown_cell(
-            """## Limits
+        Metrics are micro-aggregated from target-specific counts. Variation is
+        model-specific; a persona name describes the prompt condition and does
+        not identify the model itself."""),
+        code("""
+        persona=(metrics.groupby(['model_alias','ideology'],observed=True)
+                 .agg(n=('n','sum'),tp=('tp','sum'),tn=('tn','sum'),fp=('fp','sum'),fn=('fn','sum')))
+        persona['accuracy']=(persona.tp+persona.tn)/persona.n
+        persona['precision']=persona.tp/(persona.tp+persona.fp)
+        persona['recall']=persona.tp/(persona.tp+persona.fn)
+        persona['f1']=2*persona.precision*persona.recall/(persona.precision+persona.recall)
+        f1=persona.f1.unstack().reindex(model_order).reindex(columns=ideology_order)
+        display(f1.round(3))
+        fig,ax=plt.subplots(figsize=(10,5)); sns.heatmap(f1,annot=True,fmt='.3f',cmap='YlGnBu',ax=ax)
+        ax.set_title('Hate-speech F1 by model and assigned persona'); fig.tight_layout(); plt.show()
+        """),
+        md("""## Target-specific diagnostics
 
-The very small model-fit p-values are not the main scientific claim: there are
-many repeated configurations, and statistical detectability does not imply a
-large or general effect. The component magnitudes and their inconsistency
-across checkpoints are the more useful descriptive result. Item-level AUC,
-F1, calibration, and target-level metrics must be regenerated after the raw
-outputs and exact corpus are supplied and validated."""
-        ),
+        Targets identify which subset of the evaluation data was sampled. The
+        heatmap shows F1 for each model/target after pooling persona conditions.
+        Differences can reflect the corpus composition and should not be
+        interpreted as properties of the identity groups."""),
+        code("""
+        target=(metrics.groupby(['model_alias','target'],observed=True)
+                .agg(n=('n','sum'),tp=('tp','sum'),tn=('tn','sum'),fp=('fp','sum'),fn=('fn','sum')))
+        target['precision']=target.tp/(target.tp+target.fp)
+        target['recall']=target.tp/(target.tp+target.fn)
+        target['f1']=2*target.precision*target.recall/(target.precision+target.recall)
+        target_f1=target.f1.unstack().reindex(model_order)
+        fig,ax=plt.subplots(figsize=(13,5)); sns.heatmap(target_f1,annot=True,fmt='.2f',cmap='mako',ax=ax)
+        ax.set_title('Hate-speech F1 by model and sampled target subset'); fig.tight_layout(); plt.show()
+        """),
+        md("""## Probability separation and calibration
+
+        `mean_p_hate_gold` and `mean_p_hate_nonhate` summarize score separation.
+        The calibration plot groups predictions into ten probability bins; good
+        calibration lies near the diagonal. This is supported without raw
+        vocabulary logits."""),
+        code("""
+        separation=(metrics.groupby('model_alias',observed=True)
+                    .agg(mean_p_hate_gold=('mean_p_hate_gold','mean'),
+                         mean_p_hate_nonhate=('mean_p_hate_nonhate','mean')).reindex(model_order))
+        separation['mean separation']=separation.mean_p_hate_gold-separation.mean_p_hate_nonhate
+        display(separation.round(3))
+        fig,ax=plt.subplots(figsize=(7,6)); ax.plot([0,1],[0,1],'--',color='gray',label='perfect calibration')
+        for model in model_order:
+            sub=calibration[calibration.model_alias.eq(model)]
+            ax.plot(sub.mean_p_hate,sub.observed_hate_rate,marker='o',label=model)
+        ax.set(xlabel='Mean predicted P(hate)',ylabel='Observed hate rate',title='Calibration by model')
+        ax.legend(bbox_to_anchor=(1.02,1),loc='upper left'); fig.tight_layout(); plt.show()
+        """),
+        md("""## Prompt-factor sensitivity
+
+        `target` is treated as a data-composition block, not a prompt factor.
+        Persona wording, context and instruction components are calculated
+        within persona conditions. Magnitudes are more informative here than
+        tiny p-values produced by the large repeated design."""),
+        code("""
+        columns=['model','Mean P(Hate)','Total Var SD','Ideology SD','persona_combo_sd',
+                 'context_combo_sd','instr_combo_sd','Intrinsic Blur','Residual Jitter']
+        display(sensitivity[columns].round(3))
+        display(Image(filename=str(FIGURES/'hate_speech_factor_sensitivity.png')))
+        """),
+        md("""## What is not reproduced here
+
+        The historical `visuals_offensive_speech.ipynb` combined this task with
+        a separate offensive-speech experiment and included raw-logit temperature
+        transforms. The offensive dataset is not part of this paper release and
+        the handoff contains no raw vocabulary logits. Those cells and their
+        preserved old renderings are stored only under `legacy/`; they are not
+        presented as runnable evidence.
+
+        The released hate-speech Parquets also omit source statements and the
+        exact prompt JSON, so examples cannot be reconstructed from this release."""),
     ]
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    nbf.write(nb, OUT)
+    OUT.parent.mkdir(parents=True,exist_ok=True)
+    nbf.write(nb,OUT)
     print(OUT)
 
 
-if __name__ == "__main__":
-    main()
+if __name__=='__main__': main()

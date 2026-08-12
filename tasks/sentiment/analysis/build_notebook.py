@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
-"""Build the compact, paper-facing IBM sentiment analysis notebook."""
+"""Build the complete annotation-free IBM topic-sentiment notebook."""
 
 from pathlib import Path
-
+import textwrap
 import nbformat as nbf
 
 
 HERE = Path(__file__).resolve().parent
 OUT = HERE / "notebooks" / "01_ibm_sentiment_core.ipynb"
+
+
+def md(text): return nbf.v4.new_markdown_cell(textwrap.dedent(text).strip())
+def code(text): return nbf.v4.new_code_cell(textwrap.dedent(text).strip())
 
 
 def main() -> None:
@@ -17,95 +21,159 @@ def main() -> None:
         "language_info": {"name": "python", "version": "3"},
     }
     nb["cells"] = [
-        nbf.v4.new_markdown_cell(
-            """# IBM topic sentiment: core analysis
+        md("""# IBM topic sentiment — complete primary-model analysis
 
-This notebook intentionally excludes the target taxonomy and every
-LLM-authored annotation. It uses only gold topic-sentiment labels, model
-candidate scores, assigned persona, and randomized prompt factors."""
-        ),
-        nbf.v4.new_code_cell(
-            """from pathlib import Path
-import pandas as pd
-from IPython.display import Image, display
+        This notebook uses only fields produced by the IBM sentiment experiment:
+        gold topic sentiment, model predictions and candidate probabilities,
+        assigned persona, and randomized prompt factors. It contains the paper's
+        four Gemma 3 IT and four Qwen3 checkpoints.
 
-ANALYSIS = Path.cwd().parent if Path.cwd().name == "notebooks" else Path.cwd()
-if not (ANALYSIS / "data").exists():
-    ANALYSIS = Path.cwd() / "tasks" / "sentiment" / "analysis"
-DATA = ANALYSIS / "data"
-FIGURES = ANALYSIS / "figures"
+        The exploratory LLM-authored target taxonomy and its downstream figures
+        are deliberately excluded. They are not needed to reproduce the paper's
+        core sentiment diagnostics and would add an unvalidated annotation layer."""),
+        code("""
+        from pathlib import Path
+        import matplotlib.pyplot as plt
+        import numpy as np
+        import pandas as pd
+        import seaborn as sns
+        from IPython.display import Image, display
 
-coverage = pd.read_csv(DATA / "coverage_by_model.csv")
-summary_model = pd.read_csv(DATA / "summary_by_model.csv")
-summary_persona = pd.read_csv(DATA / "summary_by_model_persona.csv")
-sensitivity = pd.read_csv(DATA / "factor_sensitivity_macro_f1.csv")
-topics = pd.read_csv(DATA / "topic_descriptive_metrics.csv")"""
-        ),
-        nbf.v4.new_markdown_cell(
-            """## Coverage
+        ANALYSIS=Path.cwd().parent if Path.cwd().name=='notebooks' else Path.cwd()
+        if not (ANALYSIS/'data').exists(): ANALYSIS=Path.cwd()/'tasks'/'sentiment'/'analysis'
+        DATA=ANALYSIS/'data'; FIGURES=ANALYSIS/'figures'
+        coverage=pd.read_csv(DATA/'coverage_by_model.csv')
+        summary_model=pd.read_csv(DATA/'summary_by_model.csv')
+        summary_persona=pd.read_csv(DATA/'summary_by_model_persona.csv')
+        sensitivity=pd.read_csv(DATA/'factor_sensitivity_macro_f1.csv')
+        config=pd.read_csv(DATA/'config_level_metrics.csv')
+        topics=pd.read_csv(DATA/'topic_descriptive_metrics.csv')
+        model_order=['gemma-3-1b-it','gemma-3-4b-it','gemma-3-12b-it','gemma-3-27b-it',
+                     'Qwen3-4B','Qwen3-8B','Qwen3-14B','Qwen3-32B']
+        ideology_order=['base','centrism','libertarian_left','libertarian_right',
+                        'authoritarian_left','authoritarian_right']
+        sns.set_theme(style='whitegrid')
+        """),
+        md("""## Coverage and label support
 
-The archived run should contain 1,800 configurations × 30 topics = 54,000
-successful rows per model. Coverage is a prerequisite for the comparisons
-below; it is not a performance metric."""
-        ),
-        nbf.v4.new_code_cell(
-            """display(coverage)
-assert coverage["coverage"].eq(1.0).all()
-assert coverage["error_rows"].eq(0).all()
-assert coverage["successful_rows"].sum() == 432_000"""
-        ),
-        nbf.v4.new_markdown_cell(
-            """## Model and assigned-persona performance
+        Each model has 1,800 configurations × 30 topics = 54,000 predictions.
+        Coverage is checked before any comparison. The topic table also makes
+        the single gold label per topic explicit; per-topic macro-F1 would be
+        inappropriate because each topic supplies only one class."""),
+        code("""
+        display(coverage)
+        support=topics.drop_duplicates('item_index').groupby('gold_label').size().rename('topics')
+        display(support.to_frame())
+        assert coverage.coverage.eq(1).all() and coverage.error_rows.eq(0).all()
+        assert coverage.successful_rows.sum()==432_000
+        assert len(topics)==8*6*30
+        """),
+        md("""## Overall and assigned-persona performance
 
-Macro-F1 gives equal weight to the negative and positive labels. Each cell in
-the heatmap pools 300 prompt configurations for each of the 30 topics (9,000
-classifications). The base column has no political persona. The other columns
-use the named assigned persona; they do not identify a model's own ideology.
+        Macro-F1 gives equal weight to positive and negative labels. The overall
+        table pools all persona conditions. Every heatmap cell pools 9,000
+        predictions (300 configurations × 30 topics). Persona names denote the
+        assigned prompt condition, not a model's intrinsic ideology."""),
+        code("""
+        display(summary_model[['model','n','accuracy','macro_f1','negative_f1','positive_f1',
+                               'mean_confidence','positive_pred_rate']])
+        display(Image(filename=str(FIGURES/'ibm_sentiment_macro_f1_model_persona_heatmap.png')))
+        """),
+        md("""## Persona deltas from the base condition
 
-In this run, the base condition has the highest macro-F1 for every model. The
-gap is small for some model/persona combinations and much larger for others,
-so the defensible conclusion is prompt-condition sensitivity rather than a
-uniform family- or size-level law."""
-        ),
-        nbf.v4.new_code_cell(
-            """display(summary_model[["model", "n", "accuracy", "macro_f1", "positive_pred_rate"]])
-display(Image(filename=str(FIGURES / "ibm_sentiment_macro_f1_model_persona_heatmap.png")))"""
-        ),
-        nbf.v4.new_markdown_cell(
-            """## Prompt-factor sensitivity
+        Subtracting each model's base macro-F1 makes robustness loss or gain
+        visible without adding a topic taxonomy. Negative values mean lower
+        macro-F1 under that assigned persona in this experiment."""),
+        code("""
+        wide=summary_persona.pivot(index='model',columns='ideology',values='macro_f1').reindex(model_order)
+        delta=wide.subtract(wide['base'],axis=0).drop(columns='base')
+        display(delta.round(3))
+        fig,ax=plt.subplots(figsize=(10,4.8))
+        sns.heatmap(delta.reindex(columns=[x for x in ideology_order if x!='base']),annot=True,fmt='.3f',
+                    center=0,cmap='vlag',ax=ax)
+        ax.set_title("Macro-F1 change relative to each model's base condition")
+        fig.tight_layout(); plt.show()
+        """),
+        md("""## Configuration-level distributions
 
-Each named factor cell is a descriptive root-mean-square spread in
-configuration-level macro-F1 between the factor's levels, calculated within
-persona conditions. `Ideology SD` is the spread of the six persona-condition
-means. `Residual RMSE` comes from an additive dummy-coded model. These values
-show where measured robustness variation is concentrated; they are not causal
-effect estimates and do not sum to total variance.
+        Means can hide unstable configurations. The boxplots show the full
+        distribution of configuration-level macro-F1. Each configuration
+        contains all 30 topics."""),
+        code("""
+        fig,axes=plt.subplots(2,4,figsize=(17,8),sharey=True)
+        for ax,model in zip(axes.flat,model_order):
+            sub=config[config.model.eq(model)]
+            sns.boxplot(data=sub,x='ideology',y='macro_f1',order=ideology_order,showfliers=False,ax=ax)
+            ax.set_title(model); ax.tick_params(axis='x',rotation=65); ax.set_xlabel('')
+        fig.suptitle('Configuration-level macro-F1 by assigned persona',y=1.01)
+        fig.tight_layout(); plt.show()
+        """),
+        md("""## Prompt-factor sensitivity
 
-Instruction wording is the largest named prompt-factor component for six of
-eight models. The ordering of the other components varies by checkpoint."""
-        ),
-        nbf.v4.new_code_cell(
-            """display(sensitivity)
-display(Image(filename=str(FIGURES / "ibm_sentiment_factor_sensitivity_macro_f1.png")))"""
-        ),
-        nbf.v4.new_markdown_cell(
-            """## Topic-level descriptive table
+        Each named factor is a descriptive root-mean-square spread in
+        configuration macro-F1 between factor levels, calculated within persona
+        conditions. `Ideology SD` is the spread of persona-condition means;
+        `Residual RMSE` comes from an additive dummy-coded model. Components are
+        not causal and do not add up to total variance."""),
+        code("""
+        display(sensitivity.round(3))
+        display(Image(filename=str(FIGURES/'ibm_sentiment_factor_sensitivity_macro_f1.png')))
+        named=['Context','Instruction','Key Type','Permutation','Persona']
+        largest=sensitivity.set_index('model')[named].idxmax(axis=1).rename('largest named factor')
+        display(largest.to_frame().join(sensitivity.set_index('model')[named].max(axis=1).rename('SD-sized magnitude')))
+        """),
+        md("""## Topic-level descriptive diagnostics
 
-There is one gold label per topic, so per-topic macro-F1 would be misleading.
-The released table instead reports accuracy, positive-prediction rate, and
-mean candidate confidence for each model × persona × topic over 300 prompt
-configurations. It supports item-level inspection without an added taxonomy."""
-        ),
-        nbf.v4.new_code_cell(
-            """display(topics.head(12))
-assert len(topics) == 8 * 6 * 30
-assert topics.groupby(["model", "ideology"])["item_index"].nunique().eq(30).all()"""
-        ),
+        For each model × persona × topic, the table reports accuracy, positive
+        prediction rate and confidence over 300 randomized prompt
+        configurations. The largest within-topic persona ranges locate fragile
+        topics without claiming a universal political direction."""),
+        code("""
+        topic_range=(topics.groupby(['model','item_index','topic','gold_label'],observed=True)
+                     .agg(min_accuracy=('accuracy','min'),max_accuracy=('accuracy','max'),
+                          min_positive_rate=('positive_pred_rate','min'),max_positive_rate=('positive_pred_rate','max'))
+                     .reset_index())
+        topic_range['accuracy_range']=topic_range.max_accuracy-topic_range.min_accuracy
+        topic_range['positive_rate_range']=topic_range.max_positive_rate-topic_range.min_positive_rate
+        display(topic_range.sort_values('accuracy_range',ascending=False).head(20))
+        """),
+        md("""## Prediction-skew diagnostics
+
+        Accuracy does not reveal how errors move. `positive_pred_rate −
+        positive_gold_rate` is positive when a condition over-predicts positive
+        sentiment and negative when it under-predicts it."""),
+        code("""
+        skew=(config.groupby(['model','ideology'],observed=True)
+              .agg(accuracy=('accuracy','mean'),macro_f1=('macro_f1','mean'),
+                   positive_pred_rate=('positive_pred_rate','mean'),
+                   positive_gold_rate=('positive_gold_rate','mean')).reset_index())
+        skew['positive_prediction_skew']=skew.positive_pred_rate-skew.positive_gold_rate
+        display(skew.pivot(index='model',columns='ideology',values='positive_prediction_skew')
+                .reindex(model_order).reindex(columns=ideology_order).round(3))
+        """),
+        md("""## Model and size summaries
+
+        Family/size tables are descriptive only. Four checkpoints per family
+        are insufficient to infer a general scaling law, and prompt sensitivity
+        is not monotonic across all conditions."""),
+        code("""
+        model_summary=summary_model.set_index('model').reindex(model_order).copy()
+        model_summary['family']=['Gemma 3']*4+['Qwen3']*4
+        model_summary['size_b']=[1,4,12,27,4,8,14,32]
+        display(model_summary[['family','size_b','accuracy','macro_f1','mean_confidence','positive_pred_rate']])
+        """),
+        md("""## Interpretation boundary
+
+        The defensible result is that IBM topic-sentiment performance and
+        positive/negative prediction balance vary across assigned personas and
+        prompt factors, with checkpoint-specific magnitudes. This notebook does
+        not use LLM-authored target labels, does not establish an intrinsic
+        political sentiment tendency, and does not support a universal family
+        or size effect."""),
     ]
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    nbf.write(nb, OUT)
+    OUT.parent.mkdir(parents=True,exist_ok=True)
+    nbf.write(nb,OUT)
     print(OUT)
 
 
-if __name__ == "__main__":
-    main()
+if __name__=='__main__': main()

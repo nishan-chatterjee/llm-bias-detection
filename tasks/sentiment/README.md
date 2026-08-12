@@ -62,6 +62,11 @@ The core analysis reports:
   type, answer-order permutation, and persona wording;
 - descriptive per-topic accuracy and positive-prediction rates.
 
+The complete executed notebook additionally shows configuration-level score
+distributions, persona deltas from base, topic-local fragility, prediction
+skew, and descriptive model/size summaries. It does not use the discarded
+LLM-authored target taxonomy or any downstream taxonomy figure.
+
 The sensitivity heatmap is descriptive, not a causal variance decomposition.
 For a factor, its cell is the root-mean-square spread of configuration-level
 macro-F1 between that factor's levels, calculated within persona conditions.

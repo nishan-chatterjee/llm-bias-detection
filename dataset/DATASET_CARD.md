@@ -33,64 +33,171 @@ configs:
   data_files: data/hate_speech_aggregate/*.csv
 ---
 
-# PoliLean evaluation traces
+# PoliLean Evaluation Traces
 
-This private-first dataset accompanies the PoliLean code release. It contains
-the primary-model Political Compass MCQ and chat traces, IBM topic-sentiment
-traces, hate-speech item predictions, and a hate-speech configuration
-aggregate.
+Evaluation data accompanying *Navigating the Digital Spectrum: Assessing
+Political Bias, Moral Values, and Toxicity in LLMs*.
 
-## Visibility and rights status
+The Dataset contains the model outputs used for Political Compass multiple
+choice and chat experiments, IBM topic sentiment classification, and
+identity-targeted hate-speech detection. Reproduction and analysis code is in
+the [PoliLean GitHub repository](https://github.com/LukaDebevc/PoliLean_IJS/tree/release).
 
-The repository is intentionally private at initial upload.
+## Models and evaluation conditions
 
-- The Political Compass website asserts copyright and restricts unauthorized
-  adoption/adaptation. Proposition files under `restricted_inputs/` must not be
-  made public until explicit redistribution clearance is documented. The
-  reconstructed scorer and its `.npz` parameters are not included.
-- The 30 IBM test topics come from `ibm-research/claim_stance`, revision
-  `ec4e2c2ec3e0c70087c67a28a7bce58b682b8109`. The upstream card credits
-  Wikipedia and IBM and states CC BY-SA 3.0 in its licensing prose. Cite
-  Bar-Haim et al. (EACL 2017).
-- The hate-speech handoff supplies eight complete primary-model prediction
-  files and the exact experimental design. It does not supply source statements,
-  the exact prompt JSON, or the assembled corpus file. Component-dataset
-  licences therefore still require verification before public release.
-- Model weights are never included. `metadata/model_config.json` records pinned
-  Hugging Face checkpoint IDs, revisions, and chat decoding parameters.
+The primary model set is:
 
-Because the components have different or unresolved terms, the combined
-repository uses `license: other`; each component retains its own notices.
+- instruction-tuned Gemma 3 1B, 4B, 12B and 27B from the
+  [Gemma 3 release](https://huggingface.co/collections/google/gemma-3-release);
+- Qwen3 4B, 8B, 14B and 32B from the
+  [Qwen3 collection](https://huggingface.co/collections/Qwen/qwen3), including
+  matched thinking and non-thinking chat protocols.
 
-## Contents
+The optional ablation configuration uses
+[YanLabs/gemma-3-27b-it-abliterated-normpreserve-v1](https://huggingface.co/YanLabs/gemma-3-27b-it-abliterated-normpreserve-v1).
+Pinned repository revisions and decoding parameters are provided in
+`metadata/model_config.json`. No model weights are included.
 
-- `political_compass_mcq`: eight primary models × bf16/8-bit/4-bit. Historical
-  MCQ files store candidate-only probabilities; raw logits were not recorded.
-- `political_compass_chat`: four Gemma chat variants and four Qwen checkpoints
-  in think/no-think modes. Rows include prompts, Stage-1 visible text, token
-  counts, finish reasons, candidate log-probabilities, and probabilities. There
-  is no generated Stage-2 rationale: Stage 2 scores the answer candidates.
-- `political_compass_chat_ablation`: optional matched Gemma 27B abliterated
-  checkpoint, kept separate from the primary experiment.
-- `ibm_sentiment`: eight primary-model MCQ outputs with candidate
-  log-probabilities and probabilities. This task has no generated rationale.
-- `hate_speech`: eight primary-model Parquets, each containing 1,800 prompt
-  configurations × 1,332 target-specific item positions (2,397,600 rows per
-  model; 19,180,800 total). The historical files store candidate-only
-  probabilities for literal `True` and `False`; they do not store raw
-  vocabulary logits or source text. `item_index` is the stable one-based
-  position within the selected target's item list. It is intentionally not
-  presented as a global question ID because the historical wide CSV header was
-  written from the first target-specific row and later rows were appended
-  positionally.
-- `hate_speech_aggregate`: 14,400 configuration rows and factor-sensitivity
-  values. It reproduces exactly from the included item predictions.
+## Dataset configurations
 
-The `metadata/manifest.json` file records SHA-256 checksums and byte sizes.
+### `political_compass_mcq`
 
-## Sensitive content
+Twenty-four Parquet files: eight primary models evaluated in bf16, 8-bit and
+4-bit conditions. Each file has 1,800 sampled prompt configurations covering
+six assigned-persona conditions. The experiment spans fourteen languages.
 
-Political propositions and hate-speech metadata may refer to death, race,
-religion, disability, segregation, violence, and other sensitive subjects.
-The hate-speech Parquets do not contain the source statements, but downstream
-tools should still avoid displaying arbitrary sensitive records by default.
+Rows contain experimental factors and the four candidate probabilities for
+each of 62 propositions. Historical files did not record complete vocabulary
+logits. The learned Political Compass scorer is not included; released
+configuration-level coordinates and reconstruction code are available in the
+GitHub repository.
+
+### `political_compass_chat`
+
+Twelve Parquet files: four Gemma chat variants and four Qwen checkpoints in
+think/no-think modes. Each variant has 111,600 question rows: 1,800 prompt
+configurations × 62 propositions.
+
+Rows include the prompt, visible Stage-1 response, token count, finish reason,
+candidate log-probabilities and candidate probabilities. Stage 2 scores the
+answer candidates and does not produce a second rationale. Qwen thinking traces
+contain the visible model output returned by the experiment; they should not be
+treated as privileged hidden reasoning.
+
+### `political_compass_chat_ablation`
+
+A separate matched Gemma 3 27B abliterated-checkpoint diagnostic. It is not
+part of the eight-model primary comparison.
+
+### `ibm_sentiment`
+
+Eight Parquet files with 54,000 rows each: 1,800 prompt configurations × 30
+unique IBM topic-sentiment items. Rows include the topic, target phrase, gold
+positive/negative label, model prediction, correctness, candidate scores,
+assigned persona and prompt factors. This MCQ task has no generated rationale.
+
+The release analysis uses gold labels and experiment fields only. It does not
+include the discarded LLM-authored target taxonomy or downstream annotation
+figures.
+
+### `hate_speech`
+
+Eight Parquet files with 2,397,600 rows per model (19,180,800 total): 1,800
+prompt configurations × 1,332 target-specific item positions. Fields include
+assigned persona, sampled identity target, gold hate label, `p_hate`,
+`p_not_hate`, thresholded prediction and source metadata.
+
+The historical handoff does not contain source statements, the exact prompt
+JSON, raw vocabulary logits, or the assembled corpus file. Its wide CSV header
+was written from the first target-specific list and later target rows were
+appended positionally. Consequently, `item_index` is one-based within the
+selected target subset and is intentionally not called a global question ID.
+Candidate probabilities were stored at bf16 precision and may sum to one within
+approximately 0.002 rather than exactly.
+
+### `hate_speech_aggregate`
+
+The 14,400-row configuration aggregate and the factor-sensitivity table used
+by the CPU analysis. The aggregate reproduces exactly from the eight released
+hate-speech Parquets.
+
+## Loading the data
+
+With `datasets`:
+
+```python
+from datasets import load_dataset
+
+chat = load_dataset(
+    "nishan-chatterjee/polilean-evaluation-traces",
+    "political_compass_chat",
+)
+```
+
+For large configurations, select a file or use streaming:
+
+```python
+hate = load_dataset(
+    "nishan-chatterjee/polilean-evaluation-traces",
+    "hate_speech",
+    streaming=True,
+)
+```
+
+Individual Parquets can also be read directly with pandas or PyArrow. The
+`metadata/manifest.json` file records byte sizes, row counts where applicable,
+and SHA-256 checksums for release files.
+
+## Experimental metadata
+
+The `metadata/` directory contains:
+
+- model IDs, revisions and chat decoding parameters;
+- experimental designs for Political Compass, IBM sentiment and hate speech;
+- conversion provenance for the historical hate-speech files;
+- a release manifest with checksums.
+
+Prompt templates and the IBM 30-topic extract are under `inputs/`. Political
+Compass proposition files are currently kept under `restricted_inputs/` while
+redistribution terms are resolved; they must not be mirrored independently.
+
+## Intended use
+
+The Dataset supports reproduction of the paper's aggregate results, evaluation
+of prompt/persona sensitivity, matched Qwen think/no-think comparisons,
+question- or topic-level diagnostics, calibration checks, and method development
+for robust behavioral evaluation.
+
+Assigned personas are prompt conditions. They must not be described as a
+model's inherent political identity. Factor-sensitivity components describe
+variation within this experimental design and are not causal estimates. The
+four checkpoints per family are insufficient for universal scaling claims.
+
+## Sensitive content and responsible use
+
+Political prompts and model responses may discuss death, punishment, race,
+religion, disability, segregation, sexuality, violence and other sensitive
+subjects. Hate-speech metadata identifies target groups, although source
+statements are not released. These materials are evaluation stimuli or model
+outputs; their inclusion is not endorsement.
+
+Do not use the Dataset to profile people, infer an individual's politics, or
+rank protected groups. Applications should avoid displaying arbitrary
+sensitive examples by default and should preserve the distinction between
+assigned persona, model output and gold dataset labels.
+
+## Source and licence notes
+
+- Political Compass propositions and scoring remain subject to the upstream
+  Political Compass terms. The generated scorer parameters are not included.
+- The IBM 30-topic extract comes from `ibm-research/claim_stance`, pinned at
+  revision `ec4e2c2ec3e0c70087c67a28a7bce58b682b8109`. Cite Bar-Haim et al.
+  (EACL 2017). The upstream card's prose states CC BY-SA 3.0.
+- The hate-speech source documentation associates the material with Yoder et
+  al. (CoNLL 2022). The exact assembled corpus and component licences require
+  final verification before public release.
+- Model outputs may remain subject to the upstream model licences and terms.
+
+Because components have different or unresolved terms, the combined Dataset
+uses `license: other`. See the GitHub repository's `THIRD_PARTY_NOTICES.md` for
+the complete release notes.

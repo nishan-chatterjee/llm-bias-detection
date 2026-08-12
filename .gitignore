@@ -56,6 +56,11 @@ tasks/sentiment/data/questions/ibm-claim-stance/*.arrow
 tasks/hate-speech/data/corpus/english.jsonl
 tasks/hate-speech/output_hate_speech/
 
+# Notebook execution caches.
+**/.ipynb_checkpoints/
+**/__pycache__/
+*.py[cod]
+
 # Large raw/generated traces belong in the companion Hugging Face dataset.
 tasks/**/output/**/*.jsonl
 tasks/**/output/**/*.parquet

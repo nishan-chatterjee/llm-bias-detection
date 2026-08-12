@@ -20,12 +20,18 @@ cd tasks/political-compass/analysis
 python factor_sensitivity.py --figure
 ```
 
-The three notebooks are clean, primary-model views replacing the historical
-workstation notebooks:
+The three notebooks are complete primary-model release analyses. They include
+coverage and design checks, configuration distributions, persona centroids,
+factor sensitivity, protocol shifts, and explicit interpretation boundaries:
 
 1. `01_mcq_analysis_primary_models.ipynb`
 2. `02_chat_analysis_primary_models.ipynb`
 3. `03_mcq_chat_comparison_primary_models.ipynb`
+
+They intentionally exclude GaMS, Qwen 0.6B/1.7B, and stale post-hoc
+temperature transformations that are not part of the paper's primary model
+experiment. The original output-rich notebooks are retained under `legacy/`
+for provenance, including their rendered outputs.
 
 For a combined figure, the presentation order is Gemma MCQ by increasing size,
 Gemma chat by increasing size, Qwen MCQ by increasing size, Qwen no-think chat

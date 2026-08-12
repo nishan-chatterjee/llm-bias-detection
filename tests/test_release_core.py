@@ -203,6 +203,13 @@ def test_tracked_analysis_shapes():
     coverage = pd.read_csv(sentiment / "coverage_by_model.csv")
     assert len(coverage) == 8
     assert coverage["successful_rows"].sum() == 432_000
+
+    hate_item = pd.read_csv(hate / "hs_item_metrics_by_persona_target.csv")
+    hate_calibration = pd.read_csv(hate / "hs_calibration_by_model.csv")
+    assert len(hate_item) == 8 * 6 * 10
+    assert len(hate_calibration) == 8 * 10
+    assert hate_item.groupby(["model_alias", "ideology"])["target"].nunique().eq(10).all()
+    assert hate_calibration.groupby("model_alias")["probability_bin"].nunique().eq(10).all()
     assert coverage["error_rows"].sum() == 0
     assert len(pd.read_csv(sentiment / "topic_descriptive_metrics.csv")) == 8 * 6 * 30
     assert len(pd.read_csv(hate / "hs_configuration_scores.csv")) == 8 * 6 * 300
