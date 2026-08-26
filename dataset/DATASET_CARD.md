@@ -17,7 +17,7 @@ language:
 - tr
 task_categories:
 - text-classification
-pretty_name: PoliLean Evaluation Traces
+pretty_name: LLM Bias Detection Evaluation Traces
 configs:
 - config_name: political_compass_mcq
   data_files: data/political_compass_mcq/*.parquet
@@ -33,7 +33,7 @@ configs:
   data_files: data/hate_speech_aggregate/*.csv
 ---
 
-# PoliLean Evaluation Traces
+# LLM Bias Detection Evaluation Traces
 
 Evaluation data accompanying *Navigating the Digital Spectrum: Assessing
 Political Bias, Moral Values, and Toxicity in LLMs*.
@@ -41,7 +41,7 @@ Political Bias, Moral Values, and Toxicity in LLMs*.
 The Dataset contains the model outputs used for Political Compass multiple
 choice and chat experiments, IBM topic sentiment classification, and
 identity-targeted hate-speech detection. Reproduction and analysis code is in
-the [PoliLean GitHub repository](https://github.com/LukaDebevc/PoliLean_IJS/tree/release).
+the [LLM Bias Detection GitHub repository](https://github.com/nishan-chatterjee/llm-bias-detection).
 
 ## Models and evaluation conditions
 
@@ -129,7 +129,7 @@ With `datasets`:
 from datasets import load_dataset
 
 chat = load_dataset(
-    "nishan-chatterjee/polilean-evaluation-traces",
+    "nishan-chatterjee/llm-bias-detection",
     "political_compass_chat",
 )
 ```
@@ -138,7 +138,7 @@ For large configurations, select a file or use streaming:
 
 ```python
 hate = load_dataset(
-    "nishan-chatterjee/polilean-evaluation-traces",
+    "nishan-chatterjee/llm-bias-detection",
     "hate_speech",
     streaming=True,
 )

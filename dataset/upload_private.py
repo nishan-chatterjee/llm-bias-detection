@@ -12,7 +12,7 @@ from huggingface_hub import HfApi
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("stage", type=Path)
-    parser.add_argument("--repo-id", default="nishan-chatterjee/polilean-evaluation-traces")
+    parser.add_argument("--repo-id", default="nishan-chatterjee/llm-bias-detection")
     args = parser.parse_args()
     owner, _name = args.repo_id.split("/", 1)
     api = HfApi()

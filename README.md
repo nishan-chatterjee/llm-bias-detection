@@ -1,7 +1,9 @@
-# PoliLean
+# LLM Bias Detection
 
 Code and data release for *Navigating the Digital Spectrum: Assessing
-Political Bias, Moral Values, and Toxicity in LLMs*.
+Political Bias, Moral Values, and Toxicity in LLMs*. This repository preserves
+the released PoliLean evaluation code and history under a more descriptive,
+public-facing project name.
 
 The release evaluates how political-persona prompts and prompt-format choices
 affect open-weight language models on three tasks:
@@ -11,8 +13,30 @@ affect open-weight language models on three tasks:
 - identity-targeted hate-speech detection.
 
 Large evaluation traces are hosted in the companion Hugging Face Dataset:
-[nishan-chatterjee/polilean-evaluation-traces](https://huggingface.co/datasets/nishan-chatterjee/polilean-evaluation-traces).
-The companion repository currently requires access permission.
+[nishan-chatterjee/llm-bias-detection](https://huggingface.co/datasets/nishan-chatterjee/llm-bias-detection).
+
+## Political Compass visual overview
+
+The two overview figures below show the scored Political Compass positions
+under the sampled evaluation configurations. A point is one sampled prompt
+configuration and an outlined point is the mean for that assigned condition;
+ellipses show the corresponding one-standard-deviation dispersion. Assigned
+personas are experimental prompt conditions, not intrinsic model identities.
+
+### Multiple-choice protocol
+
+![Political Compass MCQ positions](tasks/political-compass/selected-visuals/political_compass_mcq_only.png)
+
+### Chat protocols
+
+![Political Compass chat positions](tasks/political-compass/selected-visuals/political_compass_chat_modes.png)
+
+The first four chat panels are Gemma checkpoints. The next four are Qwen
+checkpoints with thinking disabled; the final four are matched Qwen runs with
+thinking enabled. See the corresponding generation notebook,
+[`mcq-chat-analysis-selected-visuals.ipynb`](tasks/political-compass/mcq-chat-analysis-selected-visuals.ipynb),
+and the paper's Political Compass methods/results for the experiment design
+and interpretation.
 
 ## Models
 
