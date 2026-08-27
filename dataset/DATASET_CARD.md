@@ -194,8 +194,9 @@ assigned persona, model output and gold dataset labels.
   revision `ec4e2c2ec3e0c70087c67a28a7bce58b682b8109`. Cite Bar-Haim et al.
   (EACL 2017). The upstream card's prose states CC BY-SA 3.0.
 - The hate-speech source documentation associates the material with Yoder et
-  al. (CoNLL 2022). The exact assembled corpus and component licences require
-  final verification before public release.
+  al. (CoNLL 2022). The public release excludes its source statements; the
+  exact assembled corpus and component licences remain limitations requiring
+  final verification.
 - Model outputs may remain subject to the upstream model licences and terms.
 
 Because components have different or unresolved terms, the combined Dataset

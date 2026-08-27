@@ -158,8 +158,8 @@ speech. Their presence is part of the evaluation and is not an endorsement.
   they are not causal effects.
 - Four checkpoints per family do not establish general model-size laws.
 - The IBM analysis excludes the discarded LLM-authored target taxonomy.
-- Hate-speech source-text redistribution and component licences require final
-  verification before the Dataset becomes public.
+- The public Dataset excludes hate-speech source text and raw vocabulary
+  logits; component licences and provenance remain documented limitations.
 - Political Compass propositions remain subject to their upstream terms. The
   scorer parameters are not redistributed.
 

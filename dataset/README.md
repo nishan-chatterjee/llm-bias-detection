@@ -13,9 +13,9 @@ python dataset/package_release.py \
 python dataset/validate_release.py /tmp/polilean-hf-staging
 ```
 
-The proposition flag is suitable only for the initial private repository. Omit
-it when preparing a public version unless Political Compass redistribution
-permission has been documented.
+The proposition flag is suitable only when Political Compass redistribution
+permission has been documented. Omit it for any public Dataset release unless
+that documentation is available.
 
 The hate conversion validates the supplied design, eight primary models,
 1,800 configurations per model, 1,332 item positions per configuration, and
@@ -23,4 +23,5 @@ The hate conversion validates the supplied design, eight primary models,
 private dataset contains no hate-speech source statements or raw logits.
 
 Upload with `dataset/upload_private.py`. The helper refuses to target an
-organization namespace and creates/updates a **private Dataset** repository.
+organization namespace and creates/updates a **public Dataset** repository by
+default; pass `--private` only for a private staging release.
