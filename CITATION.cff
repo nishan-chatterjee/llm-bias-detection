@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this code or dataset, please cite the associated paper."
-title: "LLM Bias Detection evaluation release"
+title: "LLM Bias Detection reproducibility release"
 type: software
 authors:
   - family-names: Debevc
@@ -15,5 +15,7 @@ authors:
     given-names: Matej
 license: MIT
 repository-code: "https://github.com/nishan-chatterjee/llm-bias-detection"
-date-released: 2026-08-10
-version: "0.1.0"
+url: "https://github.com/nishan-chatterjee/llm-bias-detection/tree/peerj-review-v1"
+repository-artifact: "https://huggingface.co/datasets/nishan-chatterjee/llm-bias-detection"
+date-released: 2026-09-15
+version: "1.0.0"
