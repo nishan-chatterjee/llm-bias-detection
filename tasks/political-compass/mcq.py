@@ -272,10 +272,14 @@ def append_configuration(
 
 
 def candidate_softmax(logits: Any) -> Any:
-    """Softmax over only the four candidate-key logits, as in the experiment."""
+    """Float32 softmax over only the four candidate-key logits.
+
+    Model logits may be bf16. Promoting this four-value slice avoids rejecting
+    a valid distribution merely because a bf16 sum rounds away from one.
+    """
     import torch
 
-    return torch.nn.functional.softmax(logits, dim=0)
+    return torch.nn.functional.softmax(logits.float(), dim=0)
 
 
 def load_transformers_model(

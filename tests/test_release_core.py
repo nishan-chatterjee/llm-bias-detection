@@ -6,6 +6,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -308,3 +309,14 @@ def test_direct_shell_entry_points_exist():
         ROOT / "tasks/hate-speech/mcq.sh",
     ]
     assert all(path.is_file() for path in paths)
+
+
+def test_mcq_candidate_softmax_promotes_low_precision():
+    module = load_module(
+        "pct_mcq_candidate_softmax", ROOT / "tasks/political-compass/mcq.py"
+    )
+    torch = pytest.importorskip("torch")
+    logits = torch.tensor([8.0, 1.0, -2.0, -4.0], dtype=torch.bfloat16)
+    probabilities = module.candidate_softmax(logits)
+    assert probabilities.dtype == torch.float32
+    assert np.isclose(float(probabilities.sum()), 1.0, atol=1e-7)
