@@ -28,6 +28,20 @@ factor sensitivity, protocol shifts, and explicit interpretation boundaries:
 2. `02_chat_analysis_primary_models.ipynb`
 3. `03_mcq_chat_comparison_primary_models.ipynb`
 
+Download their pinned inputs and execute them from the repository root:
+
+```bash
+python scripts/download_dataset.py --component analysis
+python scripts/verify_setup.py --require-analysis-data
+jupyter nbconvert --to notebook --execute --inplace \
+  tasks/political-compass/analysis/notebooks/01_mcq_analysis_primary_models.ipynb \
+  tasks/political-compass/analysis/notebooks/02_chat_analysis_primary_models.ipynb \
+  tasks/political-compass/analysis/notebooks/03_mcq_chat_comparison_primary_models.ipynb
+```
+
+Each notebook prints the resolved `data/release/data/analysis_ready/` source
+path and rebuilds its visualizations from those downloaded tables.
+
 They intentionally exclude GaMS, Qwen 0.6B/1.7B, and stale post-hoc
 temperature transformations that are not part of the paper's primary model
 experiment. The original output-rich notebooks are retained under `legacy/`

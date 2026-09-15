@@ -31,6 +31,12 @@ configs:
   data_files: data/hate_speech/*.parquet
 - config_name: hate_speech_aggregate
   data_files: data/hate_speech_aggregate/*.csv
+- config_name: political_compass_analysis
+  data_files: data/analysis_ready/political_compass/*.parquet
+- config_name: ibm_sentiment_analysis
+  data_files: data/analysis_ready/sentiment/*.parquet
+- config_name: hate_speech_analysis
+  data_files: data/analysis_ready/hate_speech/*.parquet
 ---
 
 # LLM Bias Detection Evaluation Traces
@@ -121,6 +127,19 @@ The 14,400-row configuration aggregate and the factor-sensitivity table used
 by the CPU analysis. The aggregate reproduces exactly from the eight released
 hate-speech Parquets.
 
+### Analysis-ready configurations
+
+`political_compass_analysis`, `ibm_sentiment_analysis`, and
+`hate_speech_analysis` contain the compact, derived tables consumed by the
+canonical executed notebooks. They allow the analyses and figures to run from
+the pinned Dataset snapshot without model weights. Political Compass
+configuration coordinates are included here because rebuilding them from raw
+candidate probabilities requires the locally reconstructed scorer, whose
+generated parameters are not redistributed. The Political Compass analysis
+configuration also includes a 12-row summary of explicit Stage-1 stance versus
+Stage-2 candidate agreement; its counts were generated from all primary chat
+traces with the released conservative parser.
+
 ## Loading the data
 
 With `datasets`:
@@ -159,7 +178,10 @@ The `metadata/` directory contains:
 
 Prompt templates and the IBM 30-topic extract are under `inputs/`. Political
 Compass proposition files are currently kept under `restricted_inputs/` while
-redistribution terms are resolved; they must not be mirrored independently.
+redistribution terms are resolved. The directory name does not create an
+access restriction in a public repository: do not mirror these files
+independently, and obtain explicit permission from the Political Compass
+rights holder before treating them as redistributable research data.
 
 ## Intended use
 

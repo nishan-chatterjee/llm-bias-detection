@@ -66,6 +66,37 @@ def validate(stage: Path) -> None:
     assert len(ibm_files) == 8
     assert len(hate_files) == 8
 
+    analysis_expected = {
+        "political_compass": {
+            "pct_configuration_scores.parquet": 43_200,
+            "chat_configuration_scores.parquet": 21_600,
+            "chat_stage_agreement_summary.parquet": 12,
+            "pct_factor_sensitivity.parquet": 16,
+        },
+        "sentiment": {
+            "coverage_by_model.parquet": 8,
+            "config_level_metrics.parquet": 14_400,
+            "summary_by_model.parquet": 8,
+            "summary_by_model_persona.parquet": 48,
+            "factor_sensitivity_macro_f1.parquet": 8,
+            "topic_descriptive_metrics.parquet": 1_440,
+        },
+        "hate_speech": {
+            "hs_configuration_scores.parquet": 14_400,
+            "hs_factor_sensitivity.parquet": 8,
+            "hs_item_metrics_by_persona_target.parquet": 480,
+            "hs_calibration_by_model.parquet": 80,
+        },
+    }
+    for task, expected in analysis_expected.items():
+        task_dir = stage / "data" / "analysis_ready" / task
+        assert task_dir.is_dir(), task_dir
+        observed = {
+            path.name: pq.read_metadata(path).num_rows
+            for path in task_dir.glob("*.parquet")
+        }
+        assert observed == expected, (task, observed, expected)
+
     for path in mcq_files:
         frame = pq.read_table(path).to_pandas()
         assert len(frame) == 1800

@@ -29,22 +29,29 @@ def main():
 
         **Sensitive-content notice:** the source corpus contains identity-targeted
         hate speech. The released Parquets do not contain source statements, but
-        they do contain target-group labels and source metadata."""),
+        they do contain target-group labels and source metadata. After
+        `scripts/download_dataset.py --component analysis`, the notebook reads
+        the pinned Hugging Face analysis tables directly."""),
         code("""
         from pathlib import Path
+        import sys
         import matplotlib.pyplot as plt
         import numpy as np
         import pandas as pd
         import seaborn as sns
-        from IPython.display import Image,display
+        from IPython.display import display
 
         ANALYSIS=Path.cwd().parent if Path.cwd().name=='notebooks' else Path.cwd()
-        if not (ANALYSIS/'data').exists(): ANALYSIS=Path.cwd()/'tasks'/'hate-speech'/'analysis'
-        DATA=ANALYSIS/'data'; FIGURES=ANALYSIS/'figures'
-        scores=pd.read_csv(DATA/'hs_configuration_scores.csv')
-        sensitivity=pd.read_csv(DATA/'hs_factor_sensitivity.csv')
-        metrics=pd.read_csv(DATA/'hs_item_metrics_by_persona_target.csv')
-        calibration=pd.read_csv(DATA/'hs_calibration_by_model.csv')
+        if not (ANALYSIS/'data_access.py').exists(): ANALYSIS=Path.cwd()/'tasks'/'hate-speech'/'analysis'
+        if not (ANALYSIS/'data_access.py').exists(): raise FileNotFoundError('Run from the repository root or hate-speech analysis directory.')
+        sys.path.insert(0,str(ANALYSIS))
+        from data_access import read_table, table_path
+        names=['hs_configuration_scores','hs_factor_sensitivity','hs_item_metrics_by_persona_target','hs_calibration_by_model']
+        source=table_path(names[0]).parent
+        try: source=source.relative_to(ANALYSIS.parents[2])
+        except ValueError: pass
+        print('Hate-speech analysis source:', source)
+        scores,sensitivity,metrics,calibration=[read_table(name) for name in names]
         model_order=['gemma-3-1b-it','gemma-3-4b-it','gemma-3-12b-it','gemma-3-27b-it',
                      'Qwen3-4B','Qwen3-8B','Qwen3-14B','Qwen3-32B']
         ideology_order=['base','centrism','libertarian_left','libertarian_right',
@@ -158,7 +165,13 @@ def main():
         columns=['model','Mean P(Hate)','Total Var SD','Ideology SD','persona_combo_sd',
                  'context_combo_sd','instr_combo_sd','Intrinsic Blur','Residual Jitter']
         display(sensitivity[columns].round(3))
-        display(Image(filename=str(FIGURES/'hate_speech_factor_sensitivity.png')))
+        heat=(sensitivity.set_index('model').reindex(model_order)[
+              ['Ideology SD','persona_combo_sd','context_combo_sd','instr_combo_sd','Intrinsic Blur','Residual Jitter']]
+              .rename(columns={'persona_combo_sd':'Persona','context_combo_sd':'Context','instr_combo_sd':'Instruction'}))
+        fig,ax=plt.subplots(figsize=(11,5.5)); sns.heatmap(heat,annot=True,fmt='.3f',cmap='viridis',ax=ax)
+        ax.set(title='Hate-speech P(hate): SD-sized sensitivity components',
+               xlabel='Descriptive variation component',ylabel='Model')
+        fig.tight_layout(); plt.show()
         """),
         md("""## What is not reproduced here
 

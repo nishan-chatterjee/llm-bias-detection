@@ -30,6 +30,13 @@ bash tasks/sentiment/run_experiments.sh design
 GPU_IDS=0,1,2,3 bash tasks/sentiment/run_experiments.sh run
 ```
 
+The direct task entry point is equivalent:
+
+```bash
+GPU_IDS=0,1,2,3 bash tasks/sentiment/mcq.sh design
+GPU_IDS=0,1,2,3 bash tasks/sentiment/mcq.sh run
+```
+
 Alternatively, `GPU_IDS=0,1,2,3 bash tasks/sentiment/run_experiments.sh all`
 combines both steps. Set `DRY_RUN=1` to inspect the exact Python commands
 without launching vLLM. The runner creates vLLM workers in-process; no separate
@@ -67,6 +74,18 @@ The answer-key permutation is applied at prompt construction, and the two
 selected next-token log probabilities are normalized over those candidates.
 
 ## Analysis
+
+For the smallest notebook-only download:
+
+```bash
+python scripts/download_dataset.py --component analysis
+python scripts/verify_setup.py --require-analysis-data
+jupyter nbconvert --to notebook --execute --inplace \
+  tasks/sentiment/analysis/notebooks/01_ibm_sentiment_core.ipynb
+```
+
+The notebook prints its resolved Hugging Face analysis-table path and builds
+its visualizations directly from those tables.
 
 Rebuild the annotation-free tables and figures from the runner JSONLs or the
 downloaded release Parquets:

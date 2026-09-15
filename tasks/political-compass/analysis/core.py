@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import re
 from pathlib import Path
 
@@ -15,6 +16,7 @@ import seaborn as sns
 HERE = Path(__file__).resolve().parent
 DATA_DIR = HERE / "data"
 FIGURE_DIR = HERE / "figures"
+REPO_ROOT = HERE.parents[2]
 
 GEMMA_MODELS = [
     "gemma-3-1b-it",
@@ -50,13 +52,44 @@ IDEOLOGY_COLORS = {
 }
 
 
+def analysis_table_path(name: str, path: Path | None = None) -> Path:
+    """Resolve a downloaded analysis-ready table before the tracked fallback."""
+    if path is not None:
+        resolved = Path(path).resolve()
+        if not resolved.is_file():
+            raise FileNotFoundError(resolved)
+        return resolved
+    release_root = Path(
+        os.environ.get("LLM_BIAS_DATA_DIR", REPO_ROOT / "data" / "release")
+    ).expanduser().resolve()
+    candidates = [
+        release_root / "data" / "analysis_ready" / "political_compass" / f"{name}.parquet",
+        DATA_DIR / f"{name}.parquet",
+        DATA_DIR / f"{name}.csv",
+    ]
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    raise FileNotFoundError(
+        f"No analysis table {name!r}. Download it with "
+        "`python scripts/download_dataset.py --component analysis`, or use the tracked fallback."
+    )
+
+
+def read_analysis_table(name: str, path: Path | None = None) -> pd.DataFrame:
+    resolved = analysis_table_path(name, path)
+    if resolved.suffix == ".parquet":
+        return pd.read_parquet(resolved)
+    return pd.read_csv(resolved)
+
+
 def size_label(name: str) -> str:
     match = re.search(r"(\d+(?:\.\d+)?)[Bb]", name)
     return f"{match.group(1)}B" if match else name
 
 
 def load_mcq_configurations(path: Path | None = None) -> pd.DataFrame:
-    frame = pd.read_csv(path or DATA_DIR / "pct_configuration_scores.csv")
+    frame = read_analysis_table("pct_configuration_scores", path)
     frame = frame[frame["model"].isin(PRIMARY_MODELS)].copy()
     frame["source"] = "MCQ"
     frame["base_model"] = frame["model"]
@@ -65,7 +98,7 @@ def load_mcq_configurations(path: Path | None = None) -> pd.DataFrame:
 
 
 def load_chat_configurations(path: Path | None = None) -> pd.DataFrame:
-    frame = pd.read_parquet(path or DATA_DIR / "chat_configuration_scores.parquet")
+    frame = read_analysis_table("chat_configuration_scores", path)
     return frame[frame["base_model"].isin(PRIMARY_MODELS)].copy()
 
 

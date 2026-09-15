@@ -248,8 +248,17 @@ def test_historical_hate_conversion_uses_positional_item_index():
 
 
 def test_tracked_analysis_shapes():
+    pct = ROOT / "tasks" / "political-compass" / "analysis" / "data"
     sentiment = ROOT / "tasks" / "sentiment" / "analysis" / "data"
     hate = ROOT / "tasks" / "hate-speech" / "analysis" / "data"
+    agreement = pd.read_csv(pct / "chat_stage_agreement_summary.csv")
+    assert len(agreement) == 12
+    assert agreement["rows"].eq(111_600).all()
+    assert np.isclose(
+        agreement["agreement_rows"].sum() / agreement["comparable_rows"].sum(),
+        0.950929,
+        atol=5e-7,
+    )
     coverage = pd.read_csv(sentiment / "coverage_by_model.csv")
     assert len(coverage) == 8
     assert coverage["successful_rows"].sum() == 432_000
@@ -263,3 +272,39 @@ def test_tracked_analysis_shapes():
     assert coverage["error_rows"].sum() == 0
     assert len(pd.read_csv(sentiment / "topic_descriptive_metrics.csv")) == 8 * 6 * 30
     assert len(pd.read_csv(hate / "hs_configuration_scores.csv")) == 8 * 6 * 300
+
+
+def test_analysis_table_resolvers_prefer_downloaded_release(tmp_path, monkeypatch):
+    pct = tmp_path / "data" / "analysis_ready" / "political_compass"
+    sentiment = tmp_path / "data" / "analysis_ready" / "sentiment"
+    hate = tmp_path / "data" / "analysis_ready" / "hate_speech"
+    for directory in (pct, sentiment, hate):
+        directory.mkdir(parents=True)
+    pd.DataFrame({"marker": [1]}).to_parquet(pct / "pct_configuration_scores.parquet")
+    pd.DataFrame({"marker": [2]}).to_parquet(sentiment / "coverage_by_model.parquet")
+    pd.DataFrame({"marker": [3]}).to_parquet(hate / "hs_configuration_scores.parquet")
+    monkeypatch.setenv("LLM_BIAS_DATA_DIR", str(tmp_path))
+
+    pct_access = load_module(
+        "pct_analysis_access", ROOT / "tasks/political-compass/analysis/core.py"
+    )
+    sentiment_access = load_module(
+        "sentiment_analysis_access", ROOT / "tasks/sentiment/analysis/data_access.py"
+    )
+    hate_access = load_module(
+        "hate_analysis_access", ROOT / "tasks/hate-speech/analysis/data_access.py"
+    )
+    assert pct_access.analysis_table_path("pct_configuration_scores").is_relative_to(tmp_path)
+    assert sentiment_access.table_path("coverage_by_model").is_relative_to(tmp_path)
+    assert hate_access.table_path("hs_configuration_scores").is_relative_to(tmp_path)
+
+
+def test_direct_shell_entry_points_exist():
+    paths = [
+        ROOT / "tasks/political-compass/mcq.sh",
+        ROOT / "tasks/political-compass/chat.sh",
+        ROOT / "tasks/political-compass/chat-think.sh",
+        ROOT / "tasks/sentiment/mcq.sh",
+        ROOT / "tasks/hate-speech/mcq.sh",
+    ]
+    assert all(path.is_file() for path in paths)

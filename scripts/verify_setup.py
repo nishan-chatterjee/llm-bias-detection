@@ -30,6 +30,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--require-local-models", action="store_true")
     parser.add_argument("--require-downloaded-data", action="store_true")
+    parser.add_argument("--require-analysis-data", action="store_true")
+    parser.add_argument("--require-pct-inputs", action="store_true")
     parser.add_argument("--require-hate-inputs", action="store_true")
     args = parser.parse_args()
 
@@ -54,7 +56,7 @@ def main() -> None:
 
     question_dir = ROOT / "tasks" / "political-compass" / "data" / "questions"
     pct_questions = sorted(question_dir.glob("*.json")) if question_dir.is_dir() else []
-    if len(pct_questions) != 14:
+    if args.require_pct_inputs and len(pct_questions) != 14:
         errors.append(
             f"Political Compass runner needs 14 question files in {question_dir}; found {len(pct_questions)}"
         )
@@ -70,6 +72,13 @@ def main() -> None:
         ]:
             if not (release / "data" / name).is_dir():
                 errors.append(f"missing downloaded dataset configuration: {release / 'data' / name}")
+    if args.require_analysis_data:
+        for name in ["political_compass", "sentiment", "hate_speech"]:
+            if not (release / "data" / "analysis_ready" / name).is_dir():
+                errors.append(
+                    "missing downloaded analysis tables: "
+                    + str(release / "data" / "analysis_ready" / name)
+                )
 
     check_file(
         ROOT / "tasks" / "sentiment" / "data" / "questions" / "ibm-claim-stance" / "ibm_test_topics.csv",
@@ -89,7 +98,7 @@ def main() -> None:
         )
 
     print(f"model resolution: {len(local)} local, {len(remote)} pinned Hub fallbacks")
-    print(f"Political Compass question files: {len(pct_questions)}/14")
+    print(f"Political Compass question files: {len(pct_questions)}/14 (required only for fresh inference)")
     if errors:
         print("preflight failed:")
         for error in errors:

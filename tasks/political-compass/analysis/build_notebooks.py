@@ -40,10 +40,17 @@ from core import (
     GEMMA_MODELS, QWEN_MODELS, PRIMARY_MODELS, IDEOLOGY_ORDER,
     load_mcq_configurations, load_chat_configurations, method_order,
     plot_centroid_grid, qwen_think_outcomes, descriptive_factor_spread,
-    plot_sensitivity_heatmap, size_label,
+    plot_sensitivity_heatmap, size_label, analysis_table_path,
+    read_analysis_table,
 )
 
 sns.set_theme(style='whitegrid', context='notebook')
+def source_label(path):
+    try: return path.relative_to(ANALYSIS_DIR.parents[2])
+    except ValueError: return path
+print('Political Compass analysis source:')
+print('  MCQ:', source_label(analysis_table_path('pct_configuration_scores')))
+print('  chat:', source_label(analysis_table_path('chat_configuration_scores')))
 """
 
 
@@ -68,7 +75,9 @@ mcq = notebook(
     The generated scorer is not redistributed. Consequently, this notebook
     starts from the released coordinates and does not pretend to reconstruct
     them from candidate probabilities. The separate instrument notebook shows
-    how the scorer was reconstructed locally.
+    how the scorer was reconstructed locally. When `data/release/` is present,
+    the notebook reads the pinned Hugging Face `analysis_ready` tables; it
+    otherwise uses the byte-equivalent tracked compact tables.
     """,
     [
         md("""## Coverage and design balance
@@ -144,7 +153,7 @@ mcq = notebook(
         differences are readily detectable. Compare magnitudes and recurrence
         instead. `Response Entropy` represents candidate-probability blur."""),
         code("""
-        sensitivity = pd.read_csv(ANALYSIS_DIR / 'data' / 'pct_factor_sensitivity.csv')
+        sensitivity = read_analysis_table('pct_factor_sensitivity')
         magnitude_columns = ['Ideology','Total Variation','Residual Jitter','Response Entropy',
                              'quantization_sd','language_sd','context_combo_sd','instr_combo_sd',
                              'key_type_sd','perm_id_sd','persona_combo_sd']
@@ -189,7 +198,8 @@ chat = notebook(
     This complete release notebook covers four Gemma chat variants and the four
     primary Qwen checkpoints in matched think/no-think protocols. It uses the
     released 21,600-row configuration table; text-level proposition diagnostics
-    remain in `qualitative-analysis/`.
+    remain in `qualitative-analysis/`. When available, the table is read from
+    the pinned Hugging Face `analysis_ready` download.
     """,
     [
         md("""## Coverage and protocol balance
@@ -228,7 +238,6 @@ chat = notebook(
         diagnostic=(chat.groupby(['base_model','protocol'],observed=True)
                     .agg(configurations=('lhs_row','size'), mean_stage1_tokens=('mean_stage1_tokens','mean'),
                          median_visible_words=('mean_visible_words','median'), mean_entropy=('mean_entropy','mean'),
-                         mean_stage1_stage2_agreement=('stage1_stage2_agreement','mean'),
                          mean_target_alignment=('target_alignment_rate','mean')))
         display(diagnostic.round(3))
         fig,axes=plt.subplots(1,2,figsize=(13,4.5))
@@ -237,6 +246,23 @@ chat = notebook(
         sns.boxplot(data=chat,x='model_variant',y='mean_entropy',showfliers=False,ax=axes[1])
         axes[1].tick_params(axis='x',rotation=70); axes[1].set_title('Stage-2 candidate entropy')
         fig.tight_layout(); plt.show()
+        """),
+        md("""## Explicit Stage-1 stance versus Stage-2 classification
+
+        The parser searches the final visible lines of Stage 1 for one
+        unambiguous answer label or key, maps both stages back to the canonical
+        four choices, and compares them only when both are recoverable. Thus,
+        `conditional agreement` is agreement divided by comparable rows—not by
+        all generated rows. This checks the answer-mapping step; it does not
+        establish that the explanation is faithful or high quality."""),
+        code("""
+        agreement=read_analysis_table('chat_stage_agreement_summary')
+        display(agreement[['model_variant','rows','comparable_rows','comparable_rate',
+                           'conditional_agreement_rate']].round(4))
+        overall=agreement.agreement_rows.sum()/agreement.comparable_rows.sum()
+        print(f'Overall conditional agreement: {overall:.3%} '
+              f'({agreement.agreement_rows.sum():,}/{agreement.comparable_rows.sum():,})')
+        assert len(agreement)==12 and np.isclose(overall,0.950929,atol=5e-7)
         """),
         md("""## Prompt-factor sensitivity
 
@@ -296,6 +322,8 @@ comparison = notebook(
     This notebook compares English MCQ and chat configuration coordinates for
     the paper's eight primary checkpoints. Displays follow the paper ordering:
     Gemma MCQ then chat by size; Qwen MCQ, no-think chat and think chat by size.
+    Both inputs resolve from the pinned Hugging Face `analysis_ready` download
+    before falling back to the compact copies tracked with the code.
     """,
     [
         md("""## Coverage and comparable methods"""),

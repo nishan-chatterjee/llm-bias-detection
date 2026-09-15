@@ -30,24 +30,31 @@ def main() -> None:
 
         The exploratory LLM-authored target taxonomy and its downstream figures
         are deliberately excluded. They are not needed to reproduce the paper's
-        core sentiment diagnostics and would add an unvalidated annotation layer."""),
+        core sentiment diagnostics and would add an unvalidated annotation layer.
+        After `scripts/download_dataset.py --component analysis`, every table is
+        read from the pinned Hugging Face snapshot; otherwise the notebook uses
+        the byte-equivalent compact tables tracked with the code."""),
         code("""
         from pathlib import Path
+        import sys
         import matplotlib.pyplot as plt
         import numpy as np
         import pandas as pd
         import seaborn as sns
-        from IPython.display import Image, display
+        from IPython.display import display
 
         ANALYSIS=Path.cwd().parent if Path.cwd().name=='notebooks' else Path.cwd()
-        if not (ANALYSIS/'data').exists(): ANALYSIS=Path.cwd()/'tasks'/'sentiment'/'analysis'
-        DATA=ANALYSIS/'data'; FIGURES=ANALYSIS/'figures'
-        coverage=pd.read_csv(DATA/'coverage_by_model.csv')
-        summary_model=pd.read_csv(DATA/'summary_by_model.csv')
-        summary_persona=pd.read_csv(DATA/'summary_by_model_persona.csv')
-        sensitivity=pd.read_csv(DATA/'factor_sensitivity_macro_f1.csv')
-        config=pd.read_csv(DATA/'config_level_metrics.csv')
-        topics=pd.read_csv(DATA/'topic_descriptive_metrics.csv')
+        if not (ANALYSIS/'data_access.py').exists(): ANALYSIS=Path.cwd()/'tasks'/'sentiment'/'analysis'
+        if not (ANALYSIS/'data_access.py').exists(): raise FileNotFoundError('Run from the repository root or sentiment analysis directory.')
+        sys.path.insert(0,str(ANALYSIS))
+        from data_access import read_table, table_path
+        names=['coverage_by_model','summary_by_model','summary_by_model_persona',
+               'factor_sensitivity_macro_f1','config_level_metrics','topic_descriptive_metrics']
+        source=table_path(names[0]).parent
+        try: source=source.relative_to(ANALYSIS.parents[2])
+        except ValueError: pass
+        print('Sentiment analysis source:', source)
+        coverage,summary_model,summary_persona,sensitivity,config,topics=[read_table(name) for name in names]
         model_order=['gemma-3-1b-it','gemma-3-4b-it','gemma-3-12b-it','gemma-3-27b-it',
                      'Qwen3-4B','Qwen3-8B','Qwen3-14B','Qwen3-32B']
         ideology_order=['base','centrism','libertarian_left','libertarian_right',
@@ -77,7 +84,10 @@ def main() -> None:
         code("""
         display(summary_model[['model','n','accuracy','macro_f1','negative_f1','positive_f1',
                                'mean_confidence','positive_pred_rate']])
-        display(Image(filename=str(FIGURES/'ibm_sentiment_macro_f1_model_persona_heatmap.png')))
+        heat=summary_persona.pivot(index='model',columns='ideology',values='macro_f1').reindex(model_order).reindex(columns=ideology_order)
+        fig,ax=plt.subplots(figsize=(11,5.5)); sns.heatmap(heat,annot=True,fmt='.3f',vmin=0,vmax=1,cmap='YlGnBu',ax=ax)
+        ax.set(title='IBM topic sentiment: macro-F1 by model and persona',xlabel='Assigned persona',ylabel='Model')
+        fig.tight_layout(); plt.show()
         """),
         md("""## Persona deltas from the base condition
 
@@ -117,7 +127,12 @@ def main() -> None:
         not causal and do not add up to total variance."""),
         code("""
         display(sensitivity.round(3))
-        display(Image(filename=str(FIGURES/'ibm_sentiment_factor_sensitivity_macro_f1.png')))
+        sensitivity_columns=['Ideology SD','Total Var SD','Residual RMSE','Context','Instruction','Key Type','Permutation','Persona']
+        fig,ax=plt.subplots(figsize=(11,5.5)); sns.heatmap(sensitivity.set_index('model').reindex(model_order)[sensitivity_columns],
+                    annot=True,fmt='.3f',cmap='magma',ax=ax)
+        ax.set(title='IBM topic sentiment: configuration-level macro-F1 sensitivity',
+               xlabel='Descriptive variation component',ylabel='Model')
+        fig.tight_layout(); plt.show()
         named=['Context','Instruction','Key Type','Permutation','Persona']
         largest=sensitivity.set_index('model')[named].idxmax(axis=1).rename('largest named factor')
         display(largest.to_frame().join(sensitivity.set_index('model')[named].max(axis=1).rename('SD-sized magnitude')))

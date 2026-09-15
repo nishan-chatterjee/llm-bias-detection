@@ -33,7 +33,7 @@ smoke() {
   run_cmd "${PYTHON_BIN}" "${ROOT}/tasks/sentiment/run_ibm_sentiment.py" generate-design \
     --samples 1 --models gemma-3-1b-it --output "${smoke_root}"
   run_cmd "${PYTHON_BIN}" "${ROOT}/tasks/sentiment/run_ibm_sentiment.py" run \
-    --models gemma-3-1b-it --gpus "${GPU_IDS}" --output "${smoke_root}"
+    --models gemma-3-1b-it --gpus "${GPU_IDS%%,*}" --output "${smoke_root}"
 }
 
 case "${ACTION}" in

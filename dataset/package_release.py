@@ -60,6 +60,19 @@ def jsonl_to_parquet(source: Path, target: Path) -> int:
     return table.num_rows
 
 
+def analysis_table_to_parquet(source: Path, target: Path) -> int:
+    """Copy one tracked analysis table into a uniform Parquet release layer."""
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if source.suffix == ".parquet":
+        table = pq.read_table(source)
+    elif source.suffix == ".csv":
+        table = pacsv.read_csv(source)
+    else:
+        raise ValueError(f"Unsupported analysis table format: {source}")
+    pq.write_table(table, target, compression="zstd", compression_level=5)
+    return table.num_rows
+
+
 def sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -215,6 +228,44 @@ def package(args: argparse.Namespace) -> None:
             "eight primary-model item-prediction Parquets included; source text, "
             "exact prompt file, corpus file, and raw vocabulary logits absent"
         )
+
+    # Analysis-ready tables let every canonical notebook run from the pinned
+    # Hugging Face snapshot without model weights or the non-redistributed PCT
+    # scorer. These tables are derived only from the primary released outputs.
+    analysis_tables = {
+        "political_compass": {
+            "pct_configuration_scores": release / "tasks" / "political-compass" / "analysis" / "data" / "pct_configuration_scores.csv",
+            "chat_configuration_scores": release / "tasks" / "political-compass" / "analysis" / "data" / "chat_configuration_scores.parquet",
+            "chat_stage_agreement_summary": release / "tasks" / "political-compass" / "analysis" / "data" / "chat_stage_agreement_summary.csv",
+            "pct_factor_sensitivity": release / "tasks" / "political-compass" / "analysis" / "data" / "pct_factor_sensitivity.csv",
+        },
+        "sentiment": {
+            name: release / "tasks" / "sentiment" / "analysis" / "data" / f"{name}.csv"
+            for name in (
+                "coverage_by_model",
+                "config_level_metrics",
+                "summary_by_model",
+                "summary_by_model_persona",
+                "factor_sensitivity_macro_f1",
+                "topic_descriptive_metrics",
+            )
+        },
+        "hate_speech": {
+            name: release / "tasks" / "hate-speech" / "analysis" / "data" / f"{name}.csv"
+            for name in (
+                "hs_configuration_scores",
+                "hs_factor_sensitivity",
+                "hs_item_metrics_by_persona_target",
+                "hs_calibration_by_model",
+            )
+        },
+    }
+    for task, tables in analysis_tables.items():
+        for name, source_path in tables.items():
+            target = stage / "data" / "analysis_ready" / task / f"{name}.parquet"
+            row_counts[str(target.relative_to(stage))] = analysis_table_to_parquet(
+                source_path, target
+            )
 
     provenance = {
         "dataset_repo": args.dataset_repo,

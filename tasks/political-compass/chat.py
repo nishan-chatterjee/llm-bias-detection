@@ -568,6 +568,7 @@ def worker_process(
     gpu_memory_utilization,
     max_model_len,
     enforce_eager,
+    max_questions,
 ):
     print(
         f"[{datetime.now()}] START {model_variant} | GPUs {gpu_ids} | "
@@ -607,6 +608,8 @@ def worker_process(
             language = config_row["language"]
             prompts_dict = language_resources[language]["prompts"]
             questions_list = language_resources[language]["questions"]
+            if max_questions is not None:
+                questions_list = questions_list[:max_questions]
             items = build_items_for_config(config_row, prompts_dict, questions_list, answer_mode)
             item_lookup = {item["item_id"]: item for item in items}
             pending_items = [
@@ -712,6 +715,8 @@ def run_experiments(
     output_path=None,
     progress_log_name="_progress.log",
     max_item_retries=DEFAULT_ITEM_RETRIES,
+    max_configs=None,
+    max_questions=None,
 ):
     if not 0.0 < dp_threshold <= 1.0:
         raise ValueError(f"dp_threshold must be in (0, 1], got {dp_threshold}")
@@ -769,6 +774,16 @@ def run_experiments(
             .sort_values(["_model_order", "config_id"], kind="stable")
             .drop(columns=["_model_order"])
         )
+    if max_configs is not None:
+        if max_configs < 1:
+            raise ValueError("max_configs must be positive")
+        df_schedule = (
+            df_schedule.groupby("model_variant", sort=False, group_keys=False)
+            .head(max_configs)
+            .copy()
+        )
+    if max_questions is not None and max_questions < 1:
+        raise ValueError("max_questions must be positive")
 
     detected_gpus, vram_per_gpu, gpu_name = vllm_loader.detect_gpus()
     if detected_gpus == 0:
@@ -788,6 +803,12 @@ def run_experiments(
         generation_mode = task_df["generation_mode"].iloc[0]
         results_path = get_results_path(output_root, model_variant)
         expected_item_ids = build_expected_item_ids(task_df, language_resources)
+        if max_questions is not None:
+            expected_item_ids = {
+                f"cfg{int(config_row['config_id'])}_q{int(question['id'])}"
+                for _, config_row in task_df.iterrows()
+                for question in language_resources[str(config_row["language"])]["questions"][:max_questions]
+            }
 
         model_cfg = model_config.get(model_name, {})
         params_b = model_cfg.get("params_B")
@@ -971,6 +992,7 @@ def run_experiments(
                                 gpu_memory_utilization,
                                 max_model_len,
                                 enforce_eager,
+                                max_questions,
                             ),
                         )
                         process.start()
@@ -1177,6 +1199,18 @@ def main():
         help="Number of additional same-session retries for failed items.",
     )
     run_parser.add_argument(
+        "--max-configs",
+        type=int,
+        default=None,
+        help="Smoke-test limit applied independently to each selected model variant.",
+    )
+    run_parser.add_argument(
+        "--max-questions",
+        type=int,
+        default=None,
+        help="Smoke-test limit on propositions per selected configuration.",
+    )
+    run_parser.add_argument(
         "--language",
         type=str,
         default=DEFAULT_LANGUAGE,
@@ -1241,6 +1275,8 @@ def main():
             output_path=args.output,
             progress_log_name=args.progress_log,
             max_item_retries=args.max_item_retries,
+            max_configs=args.max_configs,
+            max_questions=args.max_questions,
         )
         return
 

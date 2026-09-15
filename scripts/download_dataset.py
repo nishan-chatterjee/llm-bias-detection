@@ -14,15 +14,23 @@ DEFAULT_TARGET = ROOT / "data" / "release"
 DEFAULT_REVISION = "4580172f58be9661e8e4abe98a12f68cf5b0be56"
 COMPONENT_PATTERNS = {
     "inputs": ["README.md", "inputs/**", "restricted_inputs/**", "metadata/**"],
+    "analysis": ["README.md", "data/analysis_ready/**", "metadata/**"],
     "political-compass": [
         "README.md",
         "data/political_compass_*/**",
+        "data/analysis_ready/political_compass/**",
         "inputs/political_compass/**",
         "restricted_inputs/political_compass/**",
         "metadata/**",
     ],
-    "sentiment": ["README.md", "data/ibm_sentiment/**", "inputs/ibm_sentiment/**", "metadata/**"],
-    "hate-speech": ["README.md", "data/hate_speech*/**", "metadata/**"],
+    "sentiment": [
+        "README.md", "data/ibm_sentiment/**", "data/analysis_ready/sentiment/**",
+        "inputs/ibm_sentiment/**", "metadata/**",
+    ],
+    "hate-speech": [
+        "README.md", "data/hate_speech*/**", "data/analysis_ready/hate_speech/**",
+        "metadata/**",
+    ],
 }
 
 
@@ -61,10 +69,23 @@ def main() -> None:
     parser.add_argument(
         "--install-pct-questions",
         action="store_true",
-        help="Copy the 14 downloaded proposition files into the runner's ignored input directory.",
+        help=(
+            "Copy the 14 downloaded proposition files into the runner's ignored input "
+            "directory. Use only if you have confirmed authorization under the upstream terms."
+        ),
+    )
+    parser.add_argument(
+        "--acknowledge-pct-terms",
+        action="store_true",
+        help="Required with --install-pct-questions; confirms you reviewed the upstream terms.",
     )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
+    if args.install_pct_questions and not args.acknowledge_pct_terms:
+        parser.error(
+            "--install-pct-questions requires --acknowledge-pct-terms. "
+            "See THIRD_PARTY_NOTICES.md and https://www.politicalcompass.org/faq."
+        )
     target = args.target.resolve()
     print(f"dataset {args.repo_id}@{args.revision} ({args.component}) -> {target}")
     if args.dry_run:

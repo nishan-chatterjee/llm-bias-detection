@@ -15,8 +15,8 @@ explicitly requested secondary ablation and is never selected by default.
 
 `data/prompts/` and `data/chat-prompts/` contain the experimental wrappers,
 persona variants, answer-key variants, and contexts. The complete Political
-Compass proposition files are intentionally ignored pending permission or a
-final rights review. Place an authorized local copy at:
+Compass proposition files are intentionally ignored by Git pending permission
+or a final rights review. Place an authorized local copy at:
 
 ```text
 tasks/political-compass/data/questions/<language>.json
@@ -26,9 +26,11 @@ Each file is a JSON list of 62 objects with `id`, `statement`, and four ordered
 `choices`. The official Political Compass FAQ states that the instrument is
 copyrighted and restricts unauthorized adoption/adaptation. Prior academic
 reproduction is not itself a licence. The same caution applies to publishing
-full prompts embedded in model traces. The public companion dataset retains the
-files under `restricted_inputs/` and documents that this folder must not be
-mirrored independently while redistribution terms are being resolved.
+full prompts embedded in model traces. The public companion dataset currently
+retains the files under `restricted_inputs/`, but that folder name does not
+enforce access control. Obtain written permission before treating those files
+as redistributable. Analysis-ready coordinate tables do not require the
+propositions or scorer.
 
 Some propositions and outputs contain sensitive language, including references
 to death, race, disability, discrimination, religion, sexuality, and violence.
@@ -40,8 +42,8 @@ then launch each protocol independently. It defaults to GPUs `0,1,2,3` and
 writes beneath `tasks/political-compass/output/`:
 
 ```bash
-bash tasks/political-compass/run_experiments.sh design
-GPU_IDS=0,1,2,3 bash tasks/political-compass/run_experiments.sh mcq
+GPU_IDS=0,1,2,3 bash tasks/political-compass/mcq.sh design
+GPU_IDS=0,1,2,3 bash tasks/political-compass/mcq.sh run
 ```
 
 The wrapper invokes the Python commands documented below. Use `DRY_RUN=1` to
@@ -97,8 +99,8 @@ For the full paper split, the shell wrapper keeps ordinary chat and Qwen think
 as separately restartable stages:
 
 ```bash
-GPU_IDS=0,1,2,3 bash tasks/political-compass/run_experiments.sh chat
-GPU_IDS=0,1,2,3 bash tasks/political-compass/run_experiments.sh chat-think
+GPU_IDS=0,1,2,3 bash tasks/political-compass/chat.sh run
+GPU_IDS=0,1,2,3 bash tasks/political-compass/chat-think.sh run
 ```
 
 `chat` means four Gemma variants plus the four Qwen `no_think` variants.
@@ -125,9 +127,12 @@ See `instrument/README.md` before reconstructing a scorer. The generated `.npz`
 is ignored and is not part of the release.
 
 The notebooks in `analysis/notebooks/` operate on compact, primary-model
-configuration tables and use a consistent presentation order. They do not need
-model weights. Raw-to-aggregate conversion requires a locally reconstructed
-scorer and is documented in `analysis/README.md`.
+configuration tables and use a consistent presentation order. Run
+`python scripts/download_dataset.py --component analysis` from the repository
+root first; the notebooks then load the Hugging Face `analysis_ready` tables
+and print their source paths. They do not need model weights.
+Raw-to-aggregate conversion requires a locally reconstructed scorer and is
+documented in `analysis/README.md`.
 
 `mcq-chat-analysis-selected-visuals.ipynb` is the executed paper-facing visual
 selection notebook. Its finalized PNG/HTML exports are in `selected-visuals/`.

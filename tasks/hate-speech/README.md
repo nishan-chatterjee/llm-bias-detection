@@ -53,9 +53,9 @@ order used to assign configuration IDs, validates both unreleased inputs, and
 runs the eight checkpoints sequentially with resumable outputs:
 
 ```bash
-bash tasks/hate-speech/run_experiments.sh design
-bash tasks/hate-speech/run_experiments.sh preflight
-GPU_IDS=0,1,2,3 bash tasks/hate-speech/run_experiments.sh run
+GPU_IDS=0,1,2,3 bash tasks/hate-speech/mcq.sh design
+GPU_IDS=0,1,2,3 bash tasks/hate-speech/mcq.sh preflight
+GPU_IDS=0,1,2,3 bash tasks/hate-speech/mcq.sh run
 ```
 
 `GPU_IDS=0,1,2,3 bash tasks/hate-speech/run_experiments.sh all` combines those
@@ -104,6 +104,18 @@ python tasks/hate-speech/analysis/summarize_item_predictions.py \
   --input /path/to/hf-download/data/hate_speech \
   --output tasks/hate-speech/analysis/data
 ```
+
+For notebook reproduction without downloading all 19.2 million item rows:
+
+```bash
+python scripts/download_dataset.py --component analysis
+python scripts/verify_setup.py --require-analysis-data
+jupyter nbconvert --to notebook --execute --inplace \
+  tasks/hate-speech/analysis/notebooks/01_hate_speech_analysis_primary_models.ipynb
+```
+
+The notebook reads the compact Hugging Face analysis configuration and
+regenerates its visualizations in place.
 
 The historical notebook combined hate speech with a separate offensive-speech
 experiment. It is preserved under `legacy/hate-speech/` with its rendered

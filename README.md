@@ -87,6 +87,13 @@ withheld scorer parameters, discarded annotations, or the separate
 offensive-speech experiment and are therefore not the canonical runnable
 analysis.
 
+For a start-to-finish data download and notebook workflow, see
+[`docs/ANALYSIS_GUIDE.md`](docs/ANALYSIS_GUIDE.md). For model placement,
+four-GPU task launchers, and optional vLLM/llama.cpp servers, see
+[`docs/INFERENCE_GUIDE.md`](docs/INFERENCE_GUIDE.md). The exact paper-value
+aggregations and known working-manuscript corrections are documented in
+[`docs/MANUSCRIPT_RESULTS_AUDIT.md`](docs/MANUSCRIPT_RESULTS_AUDIT.md).
+
 The Political Compass qualitative-analysis directory contains the localized
 chat diagnostics used in the paper. Predefined cue matches are reported as
 qualifying-language diagnostics rather than human-validated hedging labels.
@@ -94,7 +101,8 @@ Experimental multi-LLM judge annotations are not used as headline evidence.
 
 ## Data
 
-The Hugging Face release has six configurations:
+The Hugging Face release has six raw/aggregate configurations plus three
+analysis-ready configurations:
 
 | Configuration | Contents |
 |---|---|
@@ -104,6 +112,9 @@ The Hugging Face release has six configurations:
 | `ibm_sentiment` | 432,000 topic-sentiment predictions |
 | `hate_speech` | 19,180,800 item predictions in 8 Parquets |
 | `hate_speech_aggregate` | 14,400 configuration summaries and sensitivity table |
+| `political_compass_analysis` | derived MCQ/chat coordinates and sensitivity tables used by the notebooks |
+| `ibm_sentiment_analysis` | compact coverage, metric, factor, and topic tables |
+| `hate_speech_analysis` | compact configuration, item, calibration, and factor tables |
 
 The Political Compass chat traces include prompts, visible Stage-1 answers,
 token counts, finish reasons, and Stage-2 candidate scores. Stage 2 scores the
@@ -158,16 +169,24 @@ The companion dataset is pinned by default to the dataset commit matching this
 code release and is stored at `data/release/`. The complete current snapshot is
 approximately 775 MB; allow at least 1 GB of free space:
 
+For the canonical CPU notebooks, download only the compact analysis layer:
+
 ```bash
-python scripts/download_dataset.py --install-pct-questions
+python scripts/download_dataset.py --component analysis
+python scripts/verify_setup.py --require-analysis-data
+```
+
+To download the complete output snapshot instead:
+
+```bash
+python scripts/download_dataset.py
+python scripts/verify_setup.py --require-downloaded-data
 ```
 
 Use `--component inputs`, `political-compass`, `sentiment`, or `hate-speech`
 when only part of the release is needed; omitting it downloads all components.
 
-`--install-pct-questions` copies the 14 downloaded language files to the
-ignored runner path `tasks/political-compass/data/questions/`. The downloaded
-result configurations remain in:
+The downloaded result configurations remain in:
 
 ```text
 data/release/data/political_compass_mcq/
@@ -175,17 +194,27 @@ data/release/data/political_compass_chat/
 data/release/data/ibm_sentiment/
 data/release/data/hate_speech/
 data/release/data/hate_speech_aggregate/
+data/release/data/analysis_ready/
 ```
 
-Check the installation with:
+The Political Compass items are third-party copyrighted material. The official
+FAQ states that unauthorized adoption or adaptation is restricted. Prior
+academic reproduction is not a licence, and a `restricted_inputs/` folder in a
+public Dataset is not technically access-restricted. Analysis does not need the
+proposition files: it uses released derived coordinates. Fresh inference
+requires an authorized local copy in
+`tasks/political-compass/data/questions/<language>.json`. The downloader can
+install the currently deposited copy only after an explicit acknowledgement:
 
 ```bash
-python scripts/verify_setup.py --require-downloaded-data
+python scripts/download_dataset.py --component political-compass \
+  --install-pct-questions --acknowledge-pct-terms
+python scripts/verify_setup.py --require-pct-inputs
 ```
 
-The Political Compass items are third-party material. Their inclusion in the
-dataset does not change the Political Compass terms; see
-`THIRD_PARTY_NOTICES.md` before redistribution.
+This acknowledgement does not grant permission. Obtain written clearance from
+the Political Compass rights holder before treating the proposition files as
+redistributable; see `THIRD_PARTY_NOTICES.md`.
 
 ### 4. Understand the inference backends
 
@@ -203,6 +232,8 @@ optional launchers:
 GPU_IDS=0,1,2,3 TP_SIZE=4 bash scripts/serve_vllm.sh Qwen3-8B
 LLAMA_SERVER_BIN=/path/to/llama-server bash scripts/serve_llamacpp.sh \
   /path/to/model.gguf qwen3-8b-gguf
+python scripts/smoke_openai_server.py --base-url http://127.0.0.1:8080/v1 \
+  --model qwen3-8b-gguf
 ```
 
 The llama.cpp helper requires a separately obtained GGUF checkpoint and was not
@@ -228,6 +259,16 @@ GPU_IDS=0,1,2,3 bash tasks/political-compass/run_experiments.sh chat
 GPU_IDS=0,1,2,3 bash tasks/political-compass/run_experiments.sh chat-think
 ```
 
+The same stages have direct task-named entry points:
+
+```bash
+GPU_IDS=0,1,2,3 bash tasks/political-compass/mcq.sh run
+GPU_IDS=0,1,2,3 bash tasks/political-compass/chat.sh run
+GPU_IDS=0,1,2,3 bash tasks/political-compass/chat-think.sh run
+GPU_IDS=0,1,2,3 bash tasks/sentiment/mcq.sh run
+GPU_IDS=0,1,2,3 bash tasks/hate-speech/mcq.sh run
+```
+
 Here `chat` runs Gemma plus Qwen with thinking disabled; `chat-think` runs the
 four matched Qwen thinking variants. Outputs are written beneath the task's
 ignored `output/` directory. Set `OUTPUT_ROOT` to use scratch storage. Set
@@ -245,6 +286,8 @@ Switch to the CPU analysis environment and run the test suite and notebooks:
 
 ```bash
 conda activate polilean-analysis
+python scripts/download_dataset.py --component analysis
+python scripts/verify_setup.py --require-analysis-data
 pytest -q
 jupyter nbconvert --to notebook --execute --inplace \
   tasks/political-compass/analysis/notebooks/01_mcq_analysis_primary_models.ipynb \
@@ -254,8 +297,14 @@ jupyter nbconvert --to notebook --execute --inplace \
   tasks/hate-speech/analysis/notebooks/01_hate_speech_analysis_primary_models.ipynb
 ```
 
-The notebooks use tracked compact tables. To regenerate downloadable-data
-summaries where supported:
+Each notebook prints the resolved table directory. With the command above it
+must be `data/release/data/analysis_ready/<task>/`; the tracked compact tables
+are retained only as an offline fallback. All displayed plots are regenerated
+inside the notebooks from those tables.
+
+The same notebooks can fall back to the tracked compact copies when a Dataset
+snapshot is unavailable. To regenerate downloadable-data summaries from the
+full outputs where supported:
 
 ```bash
 python tasks/sentiment/analysis/core.py \
