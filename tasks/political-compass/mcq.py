@@ -50,6 +50,18 @@ PRIMARY_MODELS = [
     "Qwen3-14B",
     "Qwen3-32B",
 ]
+# Global block positions used by the completed run. Qwen3-4B was appended after
+# the original ten-model schedule, so its released IDs begin at block 10.
+RELEASE_MODEL_BLOCKS = {
+    "gemma-3-27b-it": 1,
+    "Qwen3-32B": 2,
+    "Qwen3-8B": 3,
+    "gemma-3-12b-it": 4,
+    "Qwen3-14B": 6,
+    "gemma-3-1b-it": 8,
+    "gemma-3-4b-it": 9,
+    "Qwen3-4B": 10,
+}
 QUANTIZATIONS = ["bf16", "8bit", "4bit"]
 LANGUAGES = [
     "bulgarian",
@@ -138,10 +150,10 @@ def generate_experimental_design(
     if samples_per_block < 1:
         raise ValueError("samples_per_block must be positive")
 
-    try:
-        sampler = qmc.LatinHypercube(d=8, rng=seed)  # SciPy >= 1.15
-    except TypeError:
-        sampler = qmc.LatinHypercube(d=8, seed=seed)
+    # Use the legacy ``seed`` keyword deliberately. SciPy's newer ``rng``
+    # keyword initializes a different stream for the same integer and does not
+    # reproduce the completed experiment.
+    sampler = qmc.LatinHypercube(d=8, seed=seed)
     base_samples = sampler.random(n=samples_per_block)
 
     records: list[dict[str, Any]] = []
@@ -156,7 +168,10 @@ def generate_experimental_design(
                     record["persona_idx"] = None
                 records.append(record)
     design = pd.DataFrame(records)
-    design.insert(0, "config_id", np.arange(len(design), dtype=int))
+    block_size = len(IDEOLOGIES) * samples_per_block
+    within_model = design.groupby("model", sort=False).cumcount().to_numpy(dtype=int)
+    model_offsets = design["model"].map(RELEASE_MODEL_BLOCKS).to_numpy(dtype=int) * block_size
+    design.insert(0, "config_id", model_offsets + within_model)
     return design
 
 

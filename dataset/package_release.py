@@ -81,18 +81,47 @@ def package(args: argparse.Namespace) -> None:
 
     # Political Compass MCQ: eight primary models x three quantizations.
     mcq_source = source / "tasks" / "political-compass" / "output" / "mcq-v1-300"
-    copy(mcq_source / "experimental_design.csv", stage / "metadata" / "political_compass_mcq_design.csv")
+    mcq_design_parts = []
     for model in PRIMARY:
         for quantization in QUANTIZATIONS:
             filename = f"results_{model}_{quantization}.csv"
+            source_path = mcq_source / "results" / filename
             target = stage / "data" / "political_compass_mcq" / filename.replace(".csv", ".parquet")
             row_counts[str(target.relative_to(stage))] = csv_to_parquet(
-                mcq_source / "results" / filename, target
+                source_path, target
             )
+            if quantization == "bf16":
+                columns = [
+                    "config_id", "model", "language", "ideology", "context_id",
+                    "instr_type", "instr_idx", "persona_class", "persona_idx",
+                    "key_type", "perm_id",
+                ]
+                mcq_design_parts.append(pd.read_csv(source_path, usecols=columns))
+    mcq_design = (
+        pd.concat(mcq_design_parts, ignore_index=True)
+        .drop_duplicates("config_id")
+        .sort_values("config_id")
+        .reset_index(drop=True)
+    )
+    if len(mcq_design) != 14_400 or not mcq_design["config_id"].is_unique:
+        raise ValueError("Canonical Political Compass MCQ design must contain 14,400 unique configurations")
+    mcq_design_path = stage / "metadata" / "political_compass_mcq_design.csv"
+    mcq_design.to_csv(mcq_design_path, index=False)
+    row_counts[str(mcq_design_path.relative_to(stage))] = len(mcq_design)
 
     # Political Compass chat: four Gemma and four Qwen think/no-think variants.
     chat_source = source / "tasks" / "political-compass" / "output" / "chat-v2-300"
-    copy(chat_source / "experimental_design.csv", stage / "metadata" / "political_compass_chat_design.csv")
+    chat_design = pd.read_csv(chat_source / "experimental_design.csv")
+    chat_design = (
+        chat_design[chat_design["model_variant"].isin(CHAT_VARIANTS)]
+        .sort_values("config_id")
+        .reset_index(drop=True)
+    )
+    if len(chat_design) != 21_600 or not chat_design["config_id"].is_unique:
+        raise ValueError("Canonical Political Compass chat design must contain 21,600 unique configurations")
+    chat_design_path = stage / "metadata" / "political_compass_chat_design.csv"
+    chat_design.to_csv(chat_design_path, index=False)
+    row_counts[str(chat_design_path.relative_to(stage))] = len(chat_design)
     for variant in CHAT_VARIANTS:
         target = stage / "data" / "political_compass_chat" / f"{variant}.parquet"
         row_counts[str(target.relative_to(stage))] = jsonl_to_parquet(
@@ -105,8 +134,8 @@ def package(args: argparse.Namespace) -> None:
         )
 
     # Prompt templates are original experiment metadata. Proposition files are
-    # staged only for a private/restricted upload pending Political Compass
-    # redistribution review.
+    # Staged under an explicitly restricted path pending Political Compass
+    # redistribution review. Do not mirror this folder independently.
     for path in sorted((source / "tasks" / "political-compass" / "data" / "prompts").glob("*.json")):
         copy(path, stage / "inputs" / "political_compass" / "prompts" / path.name)
     copy(
@@ -117,7 +146,7 @@ def package(args: argparse.Namespace) -> None:
         for path in sorted((source / "tasks" / "political-compass" / "data" / "questions").glob("*.json")):
             copy(path, stage / "restricted_inputs" / "political_compass" / "questions" / path.name)
         (stage / "restricted_inputs" / "README.md").write_text(
-            "Political Compass proposition files. Keep private pending explicit redistribution clearance.\n",
+            "Political Compass proposition files. Do not mirror independently pending explicit redistribution clearance.\n",
             encoding="utf-8",
         )
 
@@ -189,7 +218,7 @@ def package(args: argparse.Namespace) -> None:
 
     provenance = {
         "dataset_repo": args.dataset_repo,
-        "visibility": "private",
+        "visibility": "set by uploader; public release uses a restricted_inputs namespace",
         "primary_models": PRIMARY,
         "chat_variants": CHAT_VARIANTS,
         "included_secondary_ablation": bool(args.include_ablation),
@@ -225,7 +254,7 @@ def main() -> None:
     parser.add_argument("--source", type=Path, required=True, help="veritas-vox source checkout")
     parser.add_argument("--release", type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument("--stage", type=Path, required=True)
-    parser.add_argument("--dataset-repo", default="nishan-chatterjee/polilean-evaluation-traces")
+    parser.add_argument("--dataset-repo", default="nishan-chatterjee/llm-bias-detection")
     parser.add_argument("--include-ablation", action="store_true")
     parser.add_argument("--include-restricted-pct-inputs", action="store_true")
     parser.add_argument(

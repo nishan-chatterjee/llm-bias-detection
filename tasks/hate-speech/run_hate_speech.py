@@ -38,6 +38,16 @@ MODEL_ALIASES = [
     "Qwen3-14B",
     "Qwen3-32B",
 ]
+MODEL_REPOS = {
+    "gemma-3-1b-it": "google/gemma-3-1b-it",
+    "gemma-3-4b-it": "google/gemma-3-4b-it",
+    "gemma-3-12b-it": "google/gemma-3-12b-it",
+    "gemma-3-27b-it": "google/gemma-3-27b-it",
+    "Qwen3-4B": "Qwen/Qwen3-4B",
+    "Qwen3-8B": "Qwen/Qwen3-8B",
+    "Qwen3-14B": "Qwen/Qwen3-14B",
+    "Qwen3-32B": "Qwen/Qwen3-32B",
+}
 # Preserve the exact model-block order used by the completed historical run so
 # global config_id values match the supplied 14,400-row design.
 HISTORICAL_MODEL_ORDER = [
@@ -98,7 +108,7 @@ def map_factors(sample: np.ndarray) -> dict:
     return {
         "language": "english",
         "target": TARGETS[min(int(sample[0] * len(TARGETS)), len(TARGETS) - 1)],
-        "context_id": None
+        "context_id": -1
         if sample[1] < 0.5
         else min(int((sample[1] - 0.5) * 2 * 5), 4),
         "instr_idx": min(int(sample[3] * 10), 9),
@@ -123,10 +133,17 @@ def generate_design(
         for ideology in IDEOLOGIES:
             for point in points:
                 row = map_factors(point)
-                row.update({"model_alias": alias, "ideology": ideology, "quantization": "bf16"})
+                row.update(
+                    {
+                        "model_alias": alias,
+                        "model": MODEL_REPOS[alias],
+                        "ideology": ideology,
+                        "quantization": "bf16",
+                    }
+                )
                 if ideology == "base":
                     row["persona_class"] = None
-                    row["persona_idx"] = None
+                    row["persona_idx"] = -1
                 rows.append(row)
     design = pd.DataFrame(rows)
     design.insert(0, "config_id", np.arange(len(design), dtype=int))
@@ -198,7 +215,7 @@ def load_corpus(path: Path) -> tuple[list[dict], dict[str, list[dict]]]:
 def assemble_prompt(config: pd.Series | dict, item: dict, prompts: dict) -> str:
     segments: list[str] = []
     context_id = config.get("context_id")
-    if pd.notna(context_id):
+    if pd.notna(context_id) and int(context_id) >= 0:
         segments.append(prompts["contexts"][int(context_id)]["text"])
 
     ideology = str(config["ideology"])

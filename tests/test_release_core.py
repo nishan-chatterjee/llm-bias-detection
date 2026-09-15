@@ -19,6 +19,26 @@ def load_module(name: str, path: Path):
     return module
 
 
+def test_release_model_resolver_uses_pinned_hub_fallback():
+    resolver = load_module("resolve_model", ROOT / "scripts" / "resolve_model.py")
+    result = resolver.resolve("Qwen3-8B", ROOT / "models" / "serve")
+    assert result["alias"] == "Qwen3-8B"
+    assert result["source"] == "Qwen/Qwen3-8B"
+    assert result["revision"]
+    assert result["primary"] is True
+
+
+def test_download_helpers_select_only_primary_models():
+    downloader = load_module("download_models", ROOT / "scripts" / "download_models.py")
+    config = json.loads(
+        (ROOT / "models" / "serve" / "model_config.json").read_text(encoding="utf-8")
+    )
+    selected = downloader.parse_models("all", config)
+    assert len(selected) == 8
+    assert all(config[name]["primary"] for name in selected)
+    assert not any(config[name].get("secondary_ablation") for name in selected)
+
+
 def test_model_config_contains_only_primary_plus_named_ablation():
     config = json.loads((ROOT / "models" / "serve" / "model_config.json").read_text())
     primary = [name for name, value in config.items() if not name.startswith("_") and value.get("primary")]
@@ -40,6 +60,21 @@ def test_pct_mcq_lhs_is_deterministic_and_primary_scoped():
     assert len(left) == 2 * 6 * 3
     assert left["config_id"].is_unique
     assert set(left["model"]) == set(models)
+
+
+def test_pct_mcq_release_seed_and_global_id_blocks():
+    module = load_module(
+        "pct_mcq_release_design", ROOT / "tasks" / "political-compass" / "mcq.py"
+    )
+    design = module.generate_experimental_design(
+        300, 42, ["gemma-3-1b-it", "Qwen3-4B"], module.LANGUAGES
+    )
+    first = design.groupby("model", sort=False).first()
+    assert int(first.loc["gemma-3-1b-it", "config_id"]) == 14_400
+    assert int(first.loc["Qwen3-4B", "config_id"]) == 18_000
+    assert first.loc["gemma-3-1b-it", "language"] == "german"
+    assert int(first.loc["gemma-3-1b-it", "instr_idx"]) == 4
+    assert first.loc["gemma-3-1b-it", "key_type"] == "numeric_zero_index"
 
 
 def test_pct_prompt_permutation_reverses_labels_and_keys():
@@ -139,7 +174,8 @@ def test_hate_default_design_matches_completed_handoff():
     supplied = supplied[
         [
             "config_id", "language", "target", "context_id", "instr_idx",
-            "persona_class", "persona_idx", "model_alias", "ideology", "quantization",
+            "persona_class", "persona_idx", "model_alias", "model", "ideology",
+            "quantization",
         ]
     ]
     for frame in (generated, supplied):
@@ -147,6 +183,20 @@ def test_hate_default_design_matches_completed_handoff():
         frame["persona_idx"] = pd.to_numeric(frame["persona_idx"], errors="coerce").fillna(-1).astype(int)
         frame["persona_class"] = frame["persona_class"].fillna("").astype(str)
     assert generated.reset_index(drop=True).equals(supplied.reset_index(drop=True))
+
+
+def test_hate_design_includes_released_model_identity():
+    module = load_module(
+        "hate_design_model_identity", ROOT / "tasks" / "hate-speech" / "run_hate_speech.py"
+    )
+    design = module.generate_design(1, 42, ["gemma-3-12b-it"])
+    assert design.columns.tolist() == [
+        "config_id", "language", "target", "context_id", "instr_idx",
+        "persona_class", "persona_idx", "model_alias", "model", "ideology",
+        "quantization",
+    ]
+    assert design.iloc[0]["model"] == "google/gemma-3-12b-it"
+    assert design.iloc[0]["persona_idx"] == -1
 
 
 def test_historical_hate_conversion_uses_positional_item_index():

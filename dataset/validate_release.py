@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate a packaged PoliLean Hugging Face dataset directory."""
+"""Validate a packaged LLM Bias Detection Hugging Face dataset directory."""
 
 from __future__ import annotations
 

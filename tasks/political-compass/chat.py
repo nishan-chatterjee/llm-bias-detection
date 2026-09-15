@@ -60,6 +60,21 @@ IDEOLOGIES = [
 ]
 
 KEY_TYPES = ["numeric", "numeric_zero_index", "lowercase_start", "uppercase_start"]
+RELEASE_VARIANT_BLOCKS = {
+    "gemma-3-1b-it": 0,
+    "gemma-3-4b-it": 1,
+    "gemma-3-12b-it": 2,
+    "gemma-3-27b-it": 3,
+    "gemma-3-27b-it-abliterated-normpreserve-v1": 4,
+    "Qwen3-4B_think": 9,
+    "Qwen3-4B_no_think": 10,
+    "Qwen3-8B_think": 11,
+    "Qwen3-8B_no_think": 12,
+    "Qwen3-14B_think": 13,
+    "Qwen3-14B_no_think": 14,
+    "Qwen3-32B_think": 15,
+    "Qwen3-32B_no_think": 16,
+}
 
 
 def _jsonable(value):
@@ -250,7 +265,13 @@ def generate_experimental_design(
                     records.append(config)
 
     df = pd.DataFrame(records)
-    df["config_id"] = range(len(df))
+    block_size = len(selected_languages) * len(IDEOLOGIES) * samples_per_block
+    within_variant = df.groupby("model_variant", sort=False).cumcount()
+    offsets = df["model_variant"].map(RELEASE_VARIANT_BLOCKS) * block_size
+    if offsets.isna().any():
+        unknown = sorted(df.loc[offsets.isna(), "model_variant"].unique())
+        raise ValueError(f"No released configuration-ID block for: {unknown}")
+    df["config_id"] = offsets.astype(int) + within_variant.astype(int)
     return df
 
 

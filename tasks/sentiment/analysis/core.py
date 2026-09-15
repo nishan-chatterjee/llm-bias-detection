@@ -49,7 +49,10 @@ EXPECTED_ITEMS = 30
 EXPECTED_ROWS_PER_MODEL = EXPECTED_CONFIGS_PER_MODEL * EXPECTED_ITEMS
 
 
-def iter_jsonl(path: Path):
+def iter_records(path: Path):
+    if path.suffix == ".parquet":
+        yield from pd.read_parquet(path).to_dict(orient="records")
+        return
     with path.open("r", encoding="utf-8") as handle:
         for line_no, line in enumerate(handle, 1):
             if not line.strip():
@@ -64,7 +67,7 @@ def compact_rows(path: Path) -> tuple[pd.DataFrame, int]:
     """Keep the last record for each item UID, matching resume semantics."""
     latest: dict[int, dict] = {}
     error_records = 0
-    for record in iter_jsonl(path):
+    for record in iter_records(path):
         uid = record.get("item_uid")
         if uid is None:
             continue
@@ -81,6 +84,11 @@ def compact_rows(path: Path) -> tuple[pd.DataFrame, int]:
         if pred not in {"NEGATIVE", "POSITIVE"} or gold not in {"NEGATIVE", "POSITIVE"}:
             error_records += 1
             continue
+        probability_values = [
+            float(value)
+            for value in probs.values()
+            if value is not None and not pd.isna(value)
+        ]
         rows.append(
             {
                 "model": str(record["model"]),
@@ -94,7 +102,7 @@ def compact_rows(path: Path) -> tuple[pd.DataFrame, int]:
                 "gold_label": gold,
                 "pred_label": pred,
                 "is_correct": bool(pred == gold),
-                "confidence": max((float(value) for value in probs.values()), default=np.nan),
+                "confidence": max(probability_values, default=np.nan),
                 "context_id": int(record.get("context_id", -1)),
                 "instr_type": str(record["instr_type"]),
                 "instr_idx": int(record["instr_idx"]),
@@ -236,7 +244,9 @@ def build(raw_dir: Path, tables_dir: Path, figures_dir: Path) -> None:
     topic_parts = []
 
     for model in MODELS:
-        path = raw_dir / f"{model}.jsonl"
+        jsonl_path = raw_dir / f"{model}.jsonl"
+        parquet_path = raw_dir / f"{model}.parquet"
+        path = jsonl_path if jsonl_path.exists() else parquet_path
         if not path.exists():
             coverage_rows.append(
                 {"model": model, "successful_rows": 0, "error_rows": 0,
@@ -305,7 +315,12 @@ def build(raw_dir: Path, tables_dir: Path, figures_dir: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--raw", type=Path, required=True, help="Directory containing eight model JSONLs")
+    parser.add_argument(
+        "--raw",
+        type=Path,
+        required=True,
+        help="Directory containing eight runner JSONLs or eight downloaded release Parquets",
+    )
     parser.add_argument("--tables", type=Path, default=Path(__file__).parent / "data")
     parser.add_argument("--figures", type=Path, default=Path(__file__).parent / "figures")
     args = parser.parse_args()

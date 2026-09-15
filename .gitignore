@@ -72,6 +72,7 @@ tasks/political-compass/qualitative-analysis/artifacts/tables/gemma_abliteration
 tasks/political-compass/qualitative-analysis/artifacts/tables/gemma_abliteration/question_specific_effects.csv
 dataset/staging/
 dataset/downloads/
+data/release/
 
 # Generated analysis products that can be recreated from the released data.
 tasks/**/artifacts/embeddings/
