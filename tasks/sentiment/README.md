@@ -23,6 +23,18 @@ The runner uses the eight primary checkpoints in
 populated local `models/serve/<alias>/` takes precedence; otherwise the pinned
 Hugging Face ID and revision are used.
 
+The full four-GPU wrapper is:
+
+```bash
+bash tasks/sentiment/run_experiments.sh design
+GPU_IDS=0,1,2,3 bash tasks/sentiment/run_experiments.sh run
+```
+
+Alternatively, `GPU_IDS=0,1,2,3 bash tasks/sentiment/run_experiments.sh all`
+combines both steps. Set `DRY_RUN=1` to inspect the exact Python commands
+without launching vLLM. The runner creates vLLM workers in-process; no separate
+API server is required.
+
 ```bash
 python tasks/sentiment/run_ibm_sentiment.py generate-design
 python tasks/sentiment/run_ibm_sentiment.py run \
@@ -45,13 +57,23 @@ row stores the two candidate log-probabilities and their candidate-only
 softmax probabilities. There is no generated rationale or hidden
 chain-of-thought field in this MCQ task.
 
+### Preprocessing
+
+The original claim-level test split is reduced deterministically to the 30
+unique `(topicText, topicTarget, topicSentiment)` records used by the paper.
+The 19 positive and 11 negative values become `POSITIVE`/`NEGATIVE`; no claim
+text, LLM-authored target taxonomy, imputation, or text normalization is used.
+The answer-key permutation is applied at prompt construction, and the two
+selected next-token log probabilities are normalized over those candidates.
+
 ## Analysis
 
-Rebuild the annotation-free tables and figures from the raw model JSONLs:
+Rebuild the annotation-free tables and figures from the runner JSONLs or the
+downloaded release Parquets:
 
 ```bash
 python tasks/sentiment/analysis/core.py \
-  --raw /path/to/ibm-sentiment-jsonl-directory
+  --raw data/release/data/ibm_sentiment
 ```
 
 The core analysis reports:

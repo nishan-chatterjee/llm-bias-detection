@@ -21,6 +21,17 @@ and place or symlink a normal Transformers/vLLM checkpoint there. Model files
 are ignored by Git. Alternatively, authenticate with Hugging Face as required
 by the upstream model and let the runner download the pinned snapshot.
 
+The reproducible downloader reads the same configuration and puts every
+snapshot in the expected directory:
+
+```bash
+python scripts/download_models.py --models all
+python scripts/verify_setup.py --require-local-models
+```
+
+Use `--models gemma-3-1b-it,Qwen3-8B` to download a subset. The helper pins
+every download to the exact `revision`; it does not use a mutable branch.
+
 The generation values were copied from the checkpoints’ official generation
 configurations and are recorded here so that chat and Qwen think/no-think runs
 do not depend on mutable library defaults.

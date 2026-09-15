@@ -19,7 +19,8 @@ if [[ ! -f "${MODEL_PATH}" ]]; then
 fi
 
 echo "Serving ${MODEL_NAME} with llama.cpp at http://127.0.0.1:${PORT}/v1"
-printf ' + %q' "${LLAMA_SERVER_BIN}" --model "${MODEL_PATH}" --alias "${MODEL_NAME}" \
+printf ' + %q' "${LLAMA_SERVER_BIN}"
+printf ' %q' --model "${MODEL_PATH}" --alias "${MODEL_NAME}" \
   --n-gpu-layers "${GPU_LAYERS}" --ctx-size "${CONTEXT_SIZE}" --port "${PORT}"
 printf '\n'
 if [[ "${DRY_RUN:-0}" == "1" ]]; then

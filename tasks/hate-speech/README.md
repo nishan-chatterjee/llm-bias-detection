@@ -15,7 +15,7 @@ design, complete configuration aggregate, item-output converter, and
 reproducible factor-sensitivity analysis are included. The colleague handoff
 contains eight complete wide model CSVs: 1,800 configurations per model and
 1,332 target-specific item predictions per configuration. Those large CSVs
-remain outside Git and are converted to long Parquet for the private companion
+remain outside Git and are converted to long Parquet for the public companion
 Dataset repository.
 
 The handoff does **not** contain the source statements, exact prompt JSON, raw
@@ -48,6 +48,22 @@ target per configuration and scored its 1,332 corresponding rows.
 
 ## Run
 
+The release wrapper defaults to four GPUs, preserves the historical model-block
+order used to assign configuration IDs, validates both unreleased inputs, and
+runs the eight checkpoints sequentially with resumable outputs:
+
+```bash
+bash tasks/hate-speech/run_experiments.sh design
+bash tasks/hate-speech/run_experiments.sh preflight
+GPU_IDS=0,1,2,3 bash tasks/hate-speech/run_experiments.sh run
+```
+
+`GPU_IDS=0,1,2,3 bash tasks/hate-speech/run_experiments.sh all` combines those
+steps. `DRY_RUN=1` prints the exact Python invocations. Because the exact corpus
+and prompt file are absent from the current public release, `preflight` is
+expected to fail until collaborators supply the two documented files; this is
+an explicit reproducibility limitation rather than an optional setup step.
+
 ```bash
 python tasks/hate-speech/run_hate_speech.py validate-inputs
 python tasks/hate-speech/run_hate_speech.py generate-design
@@ -61,6 +77,10 @@ prompting, and exact last-token scoring of `True` and `False`. It writes long,
 resumable JSONL with both selected-token logits and candidate-only softmax
 probabilities. The untouched historical wide-CSV runner is retained at
 `legacy/hate-speech/run_hate_speech_original.py`.
+
+The inference runner uses Transformers directly rather than an HTTP server so
+it can retain the selected candidate logits. No separately launched vLLM or
+llama.cpp service is part of this experiment.
 
 The completed historical CSVs can be normalized with:
 
@@ -95,8 +115,9 @@ The archived code describes the corpus as target-specific HATE-IDENTITY data ass
 with Yoder et al., *How Hate Speech Varies by Target Identity: A Computational
 Analysis* (CoNLL 2022): <https://aclanthology.org/2022.conll-1.3/>. Before a
 public data upload, verify the exact assembled split, its component-dataset
-licenses, and the colleague-provided checksum. The initial Hugging Face release
-therefore remains private.
+licenses, and the colleague-provided checksum. The public Hugging Face release
+therefore contains the item-level predictions but not the source statements or
+exact prompt file.
 
 ## Analysis
 
@@ -117,3 +138,13 @@ or political group has an intrinsic hate-speech tendency.
 
 Regenerating the aggregate from the supplied eight CSVs reproduces all 14,400
 rows and both stored metrics exactly (maximum absolute difference 0).
+
+## Preprocessing summary
+
+The historical schedule selects one of ten identity targets. Its corresponding
+1,332 items are prompted without text normalization and scored using the final
+token logits for literal `True` and `False`. The collaborator CSV handoff was
+converted to long Parquet by configuration and one-based within-target item
+position. The conversion preserves supplied labels, source metadata, targets,
+and bf16-rounded probabilities; it does not reconstruct missing text, raw
+vocabulary logits, or global item IDs.

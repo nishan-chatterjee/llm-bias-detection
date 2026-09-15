@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_REPO = "nishan-chatterjee/llm-bias-detection"
 DEFAULT_TARGET = ROOT / "data" / "release"
-DEFAULT_REVISION = "aa0d0478aec737f3e3e6103ab590233ff5c710f8"
+DEFAULT_REVISION = "4580172f58be9661e8e4abe98a12f68cf5b0be56"
 COMPONENT_PATTERNS = {
     "inputs": ["README.md", "inputs/**", "restricted_inputs/**", "metadata/**"],
     "political-compass": [

@@ -12,5 +12,4 @@ Before release, record:
 - counts by gold label and primary target group.
 
 The file may contain severe identity-targeted language. It is ignored by Git
-and belongs in the private Hugging Face staging area until the above audit is
-complete.
+and must not be uploaded until the above audit is complete.
