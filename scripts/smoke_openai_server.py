@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
 from urllib.request import Request, urlopen
 
 
@@ -28,10 +29,20 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", default="http://127.0.0.1:8000/v1")
     parser.add_argument("--model", default=None, help="Served name; defaults to the first listed model")
+    parser.add_argument("--wait-ready", type=float, default=0,
+                        help="Seconds to allow for server startup before checking the endpoint.")
     args = parser.parse_args()
 
     base = args.base_url.rstrip("/")
-    models = get_json(f"{base}/models")
+    deadline = time.monotonic() + args.wait_ready
+    while True:
+        try:
+            models = get_json(f"{base}/models")
+            break
+        except OSError:
+            if time.monotonic() >= deadline:
+                raise
+            time.sleep(1)
     entries = models.get("data", [])
     if not entries:
         raise RuntimeError("Server returned no models")
@@ -46,6 +57,8 @@ def main() -> None:
         },
     )
     text = result["choices"][0]["message"]["content"]
+    if not isinstance(text, str) or not text.strip():
+        raise RuntimeError("Server returned no visible completion")
     print(json.dumps({"server_model": model, "response": text}, ensure_ascii=False))
 
 

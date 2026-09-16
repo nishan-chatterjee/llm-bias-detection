@@ -27,6 +27,9 @@ ARGS=(
 if [[ -n "${REVISION}" ]]; then
   ARGS+=(--revision "${REVISION}")
 fi
+if [[ "${ENFORCE_EAGER:-0}" == "1" ]]; then
+  ARGS+=(--enforce-eager)
+fi
 
 echo "Serving ${MODEL_ALIAS} on GPUs ${GPU_IDS} at http://${HOST}:${PORT}/v1"
 printf ' + CUDA_VISIBLE_DEVICES=%q' "${GPU_IDS}"
@@ -35,4 +38,4 @@ printf '\n'
 if [[ "${DRY_RUN:-0}" == "1" ]]; then
   exit 0
 fi
-CUDA_VISIBLE_DEVICES="${GPU_IDS}" "${PYTHON_BIN}" "${ARGS[@]}"
+CUDA_VISIBLE_DEVICES="${GPU_IDS}" exec "${PYTHON_BIN}" "${ARGS[@]}"

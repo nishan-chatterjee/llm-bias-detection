@@ -29,7 +29,7 @@ printf '\n'
 if [[ "${DRY_RUN:-0}" == "1" ]]; then
   exit 0
 fi
-CUDA_VISIBLE_DEVICES="${GPU_IDS}" "${LLAMA_SERVER_BIN}" \
+CUDA_VISIBLE_DEVICES="${GPU_IDS}" exec "${LLAMA_SERVER_BIN}" \
   --model "${MODEL_PATH}" \
   --alias "${MODEL_NAME}" \
   --n-gpu-layers "${GPU_LAYERS}" \
