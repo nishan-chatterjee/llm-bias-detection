@@ -55,7 +55,8 @@ For a small operational smoke test:
 python tasks/sentiment/run_ibm_sentiment.py generate-design \
   --models gemma-3-1b-it --samples 1 --output /tmp/ibm-sentiment-smoke
 python tasks/sentiment/run_ibm_sentiment.py run \
-  --gpus 0 --models gemma-3-1b-it --output /tmp/ibm-sentiment-smoke
+  --gpus 0 --models gemma-3-1b-it --output /tmp/ibm-sentiment-smoke \
+  --max-configs 1 --max-items 2
 ```
 
 The full design has 300 prompt configurations for each of six persona
@@ -118,6 +119,6 @@ Across the archived complete run, all eight models have 54,000/54,000 valid
 rows and no recorded errors. The base condition has the highest macro-F1 for
 every model, but the size of the drop under assigned personas varies strongly
 by model and persona. Instruction wording is the largest named prompt-factor
-component for six of eight models; this is a descriptive robustness result,
+component for seven of eight models; this is a descriptive robustness result,
 not evidence that any persona or prompt wording causes an intrinsic model
 property.

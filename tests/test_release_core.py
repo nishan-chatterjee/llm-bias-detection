@@ -119,6 +119,16 @@ def test_ibm_design_and_topic_inventory():
     assert sum(item["gold_label"] == "NEGATIVE" for item in items) == 11
 
 
+def test_ibm_smoke_subset_preserves_full_item_uids():
+    module = load_module("ibm_smoke_ids", ROOT / "tasks/sentiment/run_ibm_sentiment.py")
+    row = module.generate_experimental_design(1, 42, ["gemma-3-1b-it"]).iloc[0]
+    items = module.load_experiment_items()
+    prompts = module.load_prompt_dict(module.EXPERIMENT)
+    full = module.build_items_for_config(row, prompts, items, len(items))
+    subset = module.build_items_for_config(row, prompts, items[:2], len(items))
+    assert [item["item_uid"] for item in subset] == [item["item_uid"] for item in full[:2]]
+
+
 def hate_prompt_fixture() -> dict:
     templates = {
         kind: [{"id": f"{kind}_{idx}", "text": "{label}"} for idx in range(5)]
@@ -320,3 +330,15 @@ def test_mcq_candidate_softmax_promotes_low_precision():
     probabilities = module.candidate_softmax(logits)
     assert probabilities.dtype == torch.float32
     assert np.isclose(float(probabilities.sum()), 1.0, atol=1e-7)
+
+
+def test_dataset_analysis_configs_do_not_mix_schemas():
+    from huggingface_hub import DatasetCard
+
+    configs = DatasetCard.load(ROOT / "dataset/DATASET_CARD.md").data.to_dict()["configs"]
+    assert len(configs) == 21
+    analysis_configs = [item for item in configs if item["config_name"].startswith("analysis_")]
+    assert len(analysis_configs) == 14
+    assert all("*" not in item["data_files"] for item in analysis_configs)
+    hate_configs = [item for item in configs if item["config_name"].startswith("hate_speech_")]
+    assert all("*" not in item["data_files"] for item in hate_configs)

@@ -101,8 +101,8 @@ Experimental multi-LLM judge annotations are not used as headline evidence.
 
 ## Data
 
-The Hugging Face release has six raw/aggregate configurations plus three
-analysis-ready configurations:
+The Hugging Face release has five raw-output configurations, two historical
+aggregate configurations, and fourteen single-table analysis configurations:
 
 | Configuration | Contents |
 |---|---|
@@ -111,10 +111,11 @@ analysis-ready configurations:
 | `political_compass_chat_ablation` | matched Gemma 27B abliterated diagnostic |
 | `ibm_sentiment` | 432,000 topic-sentiment predictions |
 | `hate_speech` | 19,180,800 item predictions in 8 Parquets |
-| `hate_speech_aggregate` | 14,400 configuration summaries and sensitivity table |
-| `political_compass_analysis` | derived MCQ/chat coordinates and sensitivity tables used by the notebooks |
-| `ibm_sentiment_analysis` | compact coverage, metric, factor, and topic tables |
-| `hate_speech_analysis` | compact configuration, item, calibration, and factor tables |
+| `hate_speech_aggregate` | 14,400 configuration summaries |
+| `hate_speech_factor_sensitivity` | eight-row historical sensitivity table |
+| `analysis_pct_*` | derived MCQ/chat coordinates, Stage-1/2 agreement, and sensitivity tables |
+| `analysis_ibm_*` | compact coverage, metric, factor, and topic tables |
+| `analysis_hate_*` | compact configuration, item, calibration, and factor tables |
 
 The Political Compass chat traces include prompts, visible Stage-1 answers,
 token counts, finish reasons, and Stage-2 candidate scores. Stage 2 scores the

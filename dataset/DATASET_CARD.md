@@ -30,13 +30,37 @@ configs:
 - config_name: hate_speech
   data_files: data/hate_speech/*.parquet
 - config_name: hate_speech_aggregate
-  data_files: data/hate_speech_aggregate/*.csv
-- config_name: political_compass_analysis
-  data_files: data/analysis_ready/political_compass/*.parquet
-- config_name: ibm_sentiment_analysis
-  data_files: data/analysis_ready/sentiment/*.parquet
-- config_name: hate_speech_analysis
-  data_files: data/analysis_ready/hate_speech/*.parquet
+  data_files: data/hate_speech_aggregate/hs_configuration_scores.csv
+- config_name: hate_speech_factor_sensitivity
+  data_files: data/hate_speech_aggregate/hs_factor_sensitivity.csv
+- config_name: analysis_pct_mcq_configurations
+  data_files: data/analysis_ready/political_compass/pct_configuration_scores.parquet
+- config_name: analysis_pct_chat_configurations
+  data_files: data/analysis_ready/political_compass/chat_configuration_scores.parquet
+- config_name: analysis_pct_stage_agreement
+  data_files: data/analysis_ready/political_compass/chat_stage_agreement_summary.parquet
+- config_name: analysis_pct_factor_sensitivity
+  data_files: data/analysis_ready/political_compass/pct_factor_sensitivity.parquet
+- config_name: analysis_ibm_coverage
+  data_files: data/analysis_ready/sentiment/coverage_by_model.parquet
+- config_name: analysis_ibm_config_metrics
+  data_files: data/analysis_ready/sentiment/config_level_metrics.parquet
+- config_name: analysis_ibm_model_metrics
+  data_files: data/analysis_ready/sentiment/summary_by_model.parquet
+- config_name: analysis_ibm_persona_metrics
+  data_files: data/analysis_ready/sentiment/summary_by_model_persona.parquet
+- config_name: analysis_ibm_factor_sensitivity
+  data_files: data/analysis_ready/sentiment/factor_sensitivity_macro_f1.parquet
+- config_name: analysis_ibm_topic_metrics
+  data_files: data/analysis_ready/sentiment/topic_descriptive_metrics.parquet
+- config_name: analysis_hate_configurations
+  data_files: data/analysis_ready/hate_speech/hs_configuration_scores.parquet
+- config_name: analysis_hate_factor_sensitivity
+  data_files: data/analysis_ready/hate_speech/hs_factor_sensitivity.parquet
+- config_name: analysis_hate_item_metrics
+  data_files: data/analysis_ready/hate_speech/hs_item_metrics_by_persona_target.parquet
+- config_name: analysis_hate_calibration
+  data_files: data/analysis_ready/hate_speech/hs_calibration_by_model.parquet
 ---
 
 # LLM Bias Detection Evaluation Traces
@@ -123,20 +147,22 @@ approximately 0.002 rather than exactly.
 
 ### `hate_speech_aggregate`
 
-The 14,400-row configuration aggregate and the factor-sensitivity table used
-by the CPU analysis. The aggregate reproduces exactly from the eight released
-hate-speech Parquets.
+The 14,400-row configuration aggregate used by the CPU analysis. It reproduces
+exactly from the eight released hate-speech Parquets. The eight-row historical
+factor table is exposed separately as `hate_speech_factor_sensitivity` because
+the two tables have different schemas.
 
 ### Analysis-ready configurations
 
-`political_compass_analysis`, `ibm_sentiment_analysis`, and
-`hate_speech_analysis` contain the compact, derived tables consumed by the
-canonical executed notebooks. They allow the analyses and figures to run from
+The fourteen `analysis_pct_*`, `analysis_ibm_*`, and `analysis_hate_*`
+configurations contain the compact, derived tables consumed by the canonical
+executed notebooks. Each configuration contains one table so that it has a
+single coherent schema. They allow the analyses and figures to run from
 the pinned Dataset snapshot without model weights. Political Compass
 configuration coordinates are included here because rebuilding them from raw
 candidate probabilities requires the locally reconstructed scorer, whose
-generated parameters are not redistributed. The Political Compass analysis
-configuration also includes a 12-row summary of explicit Stage-1 stance versus
+generated parameters are not redistributed. `analysis_pct_stage_agreement`
+includes a 12-row summary of explicit Stage-1 stance versus
 Stage-2 candidate agreement; its counts were generated from all primary chat
 traces with the released conservative parser.
 
@@ -166,6 +192,17 @@ hate = load_dataset(
 Individual Parquets can also be read directly with pandas or PyArrow. The
 `metadata/manifest.json` file records byte sizes, row counts where applicable,
 and SHA-256 checksums for release files.
+
+For example, the small derived chat-coordinate table can be loaded without
+the proposition files or scorer:
+
+```python
+chat_coordinates = load_dataset(
+    "nishan-chatterjee/llm-bias-detection",
+    "analysis_pct_chat_configurations",
+    split="train",
+)
+```
 
 ## Experimental metadata
 

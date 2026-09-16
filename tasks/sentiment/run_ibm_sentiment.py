@@ -562,6 +562,7 @@ def worker_process(
     enforce_eager,
     save_prompts,
     save_input_text,
+    max_items,
 ):
     print(
         f"[{datetime.now()}] START {model_variant} | GPUs {gpu_ids} | "
@@ -586,6 +587,8 @@ def worker_process(
         prompts_dict = load_prompt_dict(experiment)
         experiment_items = load_experiment_items(experiment)
         num_items = len(experiment_items)
+        if max_items is not None:
+            experiment_items = experiment_items[:max_items]
         completed_uids = load_completed_success_uids(results_path)
 
         for _, config_row in task_df.sort_values("config_id").iterrows():
@@ -594,7 +597,10 @@ def worker_process(
 
             config_id = int(config_row["config_id"])
             first_uid = config_id * num_items
-            if all((first_uid + item_idx) in completed_uids for item_idx in range(num_items)):
+            if all(
+                (first_uid + item_idx) in completed_uids
+                for item_idx in range(len(experiment_items))
+            ):
                 continue
 
             items = build_items_for_config(config_row, prompts_dict, experiment_items, num_items)
@@ -700,6 +706,8 @@ def run_experiments(
     max_item_retries=DEFAULT_ITEM_RETRIES,
     save_prompts=False,
     save_input_text=False,
+    max_configs=None,
+    max_items=None,
 ):
     if not 0.0 < dp_threshold <= 1.0:
         raise ValueError(f"dp_threshold must be in (0, 1], got {dp_threshold}")
@@ -738,8 +746,19 @@ def run_experiments(
             .drop(columns=["_model_order"])
         )
 
+    if max_configs is not None:
+        if max_configs < 1:
+            raise ValueError("max_configs must be positive")
+        df_schedule = (
+            df_schedule.groupby("model_variant", sort=False, group_keys=False)
+            .head(max_configs)
+            .copy()
+        )
+    if max_items is not None and max_items < 1:
+        raise ValueError("max_items must be positive")
+
     experiment_items = load_experiment_items(experiment)
-    num_items = len(experiment_items)
+    num_items = min(len(experiment_items), max_items) if max_items is not None else len(experiment_items)
     model_config = vllm_loader.load_model_config(MODEL_DIR)
 
     detected_gpus, vram_per_gpu, gpu_name, usable_gpus = detect_requested_gpus(available_gpus)
@@ -923,6 +942,7 @@ def run_experiments(
                                 enforce_eager,
                                 save_prompts,
                                 save_input_text,
+                                max_items,
                             ),
                         )
                         process.start()
@@ -1034,6 +1054,8 @@ def main():
     run_parser.add_argument("--max-item-retries", type=int, default=DEFAULT_ITEM_RETRIES)
     run_parser.add_argument("--save-prompts", action="store_true")
     run_parser.add_argument("--save-input-text", action="store_true")
+    run_parser.add_argument("--max-configs", type=int, help="limit pending configs per model (smoke tests)")
+    run_parser.add_argument("--max-items", type=int, help="limit topic items per config (smoke tests)")
 
     compact_parser = subparsers.add_parser("compact", help="Compact result JSONLs by latest item_uid")
     compact_parser.add_argument("--output", type=str, required=True)
@@ -1083,6 +1105,8 @@ def main():
             max_item_retries=args.max_item_retries,
             save_prompts=args.save_prompts,
             save_input_text=args.save_input_text,
+            max_configs=args.max_configs,
+            max_items=args.max_items,
         )
         return
 
