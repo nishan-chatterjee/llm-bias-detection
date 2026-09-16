@@ -46,6 +46,14 @@ tasks/hate-speech/data/
 └── prompts/english.json   # five contexts, ten instructions, persona templates
 ```
 
+This uses the same task-local `data/` organisation as Political Compass and
+sentiment, with prompt templates separated from the dataset. We deliberately
+use `corpus/` for the corpus rather than the historical runner's `hate_speech/`
+subfolder. The Python runner resolves both defaults from its own file location,
+and the shell wrapper passes absolute paths; no particular working directory
+is required. The preserved original runner under `legacy/` retains its original
+relative paths and is not the recommended release entry point.
+
 The corpus schema is one JSON object per line with `text`, `hate`,
 `target_groups`, `dataset`, and `grouping`. The first target group must be one
 of the ten groups named in `run_hate_speech.py`. The completed run selected one

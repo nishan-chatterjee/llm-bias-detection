@@ -1,15 +1,12 @@
-# Corpus placeholder
+# Validated hate-speech corpus
 
-Place the colleague-confirmed `english.jsonl` here. Do not rename or substitute
-a different hate-speech benchmark merely because it has similar labels.
+`english.jsonl` is included: 13,320 items across ten primary targets, with
+1,332 items per target (666 hate and 666 non-hate). The 1,332 count refers to
+one target-specific configuration, not the total corpus size.
 
-Before release, record:
+The supplied bytes are preserved. SHA-256, component attribution, licences and
+the complete archived-output metadata-alignment check are in `../README.md`.
+The file is tracked by Git and supplied in the HF `hate_speech_inputs` layer.
 
-- exact row count (the archived experiment documentation says 1,332);
-- SHA-256 checksum;
-- source/component dataset names and versions;
-- redistribution terms for every component;
-- counts by gold label and primary target group.
-
-The file may contain severe identity-targeted language. It is ignored by Git
-and must not be uploaded until the above audit is complete.
+**Sensitive-content warning:** this corpus contains hate speech, slurs and
+offensive language. Do not display raw examples by default.

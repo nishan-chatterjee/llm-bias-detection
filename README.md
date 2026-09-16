@@ -97,12 +97,16 @@ four-GPU task launchers, and optional vLLM/llama.cpp servers, see
 aggregations and known working-manuscript corrections are documented in
 [`docs/MANUSCRIPT_RESULTS_AUDIT.md`](docs/MANUSCRIPT_RESULTS_AUDIT.md).
 
-The latest workflow is pinned by code tag `peerj-review-v3`; the companion
+The latest workflow is pinned by code tag `peerj-review-v4`; the companion
 Dataset commit is `97f424a5bd962b12b9258c338130b77b4f75b34a`, also pinned in
 `scripts/download_dataset.py`. See
 [`docs/POLITICAL_COMPASS_RIGHTS.md`](docs/POLITICAL_COMPASS_RIGHTS.md) for the
 unresolved rights issue affecting full proposition text already in raw outputs.
 The compact `--component analysis` download avoids that text.
+
+For the supplemental-code ZIP, PeerJ upload legend, exact manuscript availability
+replacement, and optional Zenodo DOI workflow, see
+[`docs/PEERJ_SUPPLEMENT.md`](docs/PEERJ_SUPPLEMENT.md).
 
 The Political Compass qualitative-analysis directory contains the localized
 chat diagnostics used in the paper. Predefined cue matches are reported as

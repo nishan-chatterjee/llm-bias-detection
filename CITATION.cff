@@ -15,10 +15,10 @@ authors:
     given-names: Matej
 license: MIT
 repository-code: "https://github.com/nishan-chatterjee/llm-bias-detection"
-url: "https://github.com/nishan-chatterjee/llm-bias-detection/tree/peerj-review-v3"
+url: "https://github.com/nishan-chatterjee/llm-bias-detection/tree/peerj-review-v4"
 repository-artifact: "https://huggingface.co/datasets/nishan-chatterjee/llm-bias-detection"
 date-released: 2026-09-16
-version: "1.2.0"
+version: "1.2.1"
 preferred-citation:
   type: generic
   title: "Navigating the digital spectrum: Assessing political bias, stability, and downstream fairness in Large Language Models"
