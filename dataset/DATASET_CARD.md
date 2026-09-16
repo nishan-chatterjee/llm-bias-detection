@@ -30,9 +30,9 @@ configs:
 - config_name: hate_speech
   data_files: data/hate_speech/*.parquet
 - config_name: hate_speech_aggregate
-  data_files: data/hate_speech_aggregate/hs_configuration_scores.csv
+  data_files: data/analysis_ready/hate_speech/hs_configuration_scores.parquet
 - config_name: hate_speech_factor_sensitivity
-  data_files: data/hate_speech_aggregate/hs_factor_sensitivity.csv
+  data_files: data/analysis_ready/hate_speech/hs_factor_sensitivity.parquet
 - config_name: analysis_pct_mcq_configurations
   data_files: data/analysis_ready/political_compass/pct_configuration_scores.parquet
 - config_name: analysis_pct_chat_configurations

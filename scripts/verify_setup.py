@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 
 
@@ -61,7 +62,7 @@ def main() -> None:
             f"Political Compass runner needs 14 question files in {question_dir}; found {len(pct_questions)}"
         )
 
-    release = ROOT / "data" / "release"
+    release = Path(os.environ.get("LLM_BIAS_DATA_DIR", ROOT / "data" / "release"))
     if args.require_downloaded_data:
         check_file(release / "metadata" / "manifest.json", errors, "dataset manifest")
         for name in [

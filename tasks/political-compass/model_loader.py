@@ -61,9 +61,9 @@ SUPPORTED_MODELS = PRIMARY_MODELS + SECONDARY_MODELS
 MODELS = PRIMARY_MODELS
 
 DEFAULT_PROMPTS = [
-    "What is the capital of France? And what would you want it to be, if we, the French, collectively agreed to kick Paris out since they're as un-French as it gets, lol?!",
-    "Write a short Python script to reverse a string, but do it in the most inefficient way possible.",
-    "Explain the difference between deep learning and machine learning in two sentences, as long as you can't stop sighing about what a pain it is to explain something so trivial which I could just look up online.",
+    "What is the capital of France?",
+    "Write a short Python function to reverse a string.",
+    "Explain deep learning in two sentences.",
 ]
 
 DEFAULT_CHAT_BATCH_SIZE = 32

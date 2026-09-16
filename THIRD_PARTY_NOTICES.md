@@ -21,6 +21,13 @@ scoring parameters are intentionally excluded from the Git release pending
 explicit redistribution clearance. The supplied code does not grant rights to
 use or redistribute that material.
 
+The public companion dataset already contains proposition text, both as input
+JSON and embedded in chat records. No redistribution permission has been
+established. A public folder named `restricted_inputs` is not access-controlled.
+See the [official FAQ](https://www.politicalcompass.org/faq) and
+`docs/POLITICAL_COMPASS_RIGHTS.md` for the unresolved rights review. The portable
+aggregate analysis download avoids these inputs and raw chat text.
+
 ## Model checkpoints and outputs
 
 No checkpoint weights are redistributed. Repository identifiers and pinned
