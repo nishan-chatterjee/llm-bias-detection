@@ -346,9 +346,74 @@ def test_dataset_analysis_configs_do_not_mix_schemas():
     from huggingface_hub import DatasetCard
 
     configs = DatasetCard.load(ROOT / "dataset/DATASET_CARD.md").data.to_dict()["configs"]
-    assert len(configs) == 21
+    assert len(configs) == 22
     analysis_configs = [item for item in configs if item["config_name"].startswith("analysis_")]
     assert len(analysis_configs) == 14
     assert all("*" not in item["data_files"] for item in analysis_configs)
     hate_configs = [item for item in configs if item["config_name"].startswith("hate_speech_")]
     assert all("*" not in item["data_files"] for item in hate_configs)
+
+
+def test_included_hate_inputs_are_balanced_and_hash_identified():
+    import hashlib
+    module = load_module('hate_included_inputs', ROOT / 'tasks/hate-speech/run_hate_speech.py')
+    data = ROOT / 'tasks/hate-speech/data'
+    module.load_prompts(data / 'prompts/english.json')
+    records, grouped = module.load_corpus(data / 'corpus/english.jsonl')
+    assert len(records) == 13_320
+    assert all(len(items) == 1332 and sum(i['hate'] for i in items) == 666
+               for items in grouped.values())
+    assert hashlib.sha256((data / 'corpus/english.jsonl').read_bytes()).hexdigest() == \
+        '6737b0d401b33c970cd4006a5122e31b411d814056f5b261f745bd731f07196f'
+    assert hashlib.sha256((data / 'prompts/english.json').read_bytes()).hexdigest() == \
+        'f3154a073122a1993d63adf2c675dc0b3954c07d63af7a1a383d5fe57d53b94c'
+
+
+def test_hate_input_installer_verifies_hash_and_preserves_local_edits(tmp_path):
+    import hashlib
+    module = load_module('hate_download_installer', ROOT / 'scripts/download_dataset.py')
+    snapshot = tmp_path / 'snapshot'
+    (snapshot / 'metadata').mkdir(parents=True)
+    manifest = []
+    for relative in ['prompts/english.json', 'corpus/english.jsonl']:
+        source = snapshot / 'inputs/hate_speech' / relative
+        source.parent.mkdir(parents=True)
+        source.write_text('{}\n')
+        manifest.append({'path': f'inputs/hate_speech/{relative}',
+                         'sha256': hashlib.sha256(source.read_bytes()).hexdigest()})
+    (snapshot / 'metadata/manifest.json').write_text(json.dumps(manifest))
+    target = tmp_path / 'checkout'
+    assert module.install_hate_inputs(snapshot, target) == 2
+    local = target / 'tasks/hate-speech/data/corpus/english.jsonl'
+    local.write_text('local user edit\n')
+    with pytest.raises(FileExistsError):
+        module.install_hate_inputs(snapshot, target)
+    assert local.read_text() == 'local user edit\n'
+
+
+def test_hate_prompt_templates_assemble_with_included_inputs():
+    module = load_module('hate_real_template_test', ROOT / 'tasks/hate-speech/run_hate_speech.py')
+    data = ROOT / 'tasks/hate-speech/data'
+    prompts = module.load_prompts(data / 'prompts/english.json')
+    records, _ = module.load_corpus(data / 'corpus/english.jsonl')
+    for _, config in module.generate_design(300, 42, ['gemma-3-1b-it']).iterrows():
+        rendered = module.assemble_prompt(config, records[0], prompts)
+        assert rendered and records[0]['text'] in rendered
+
+
+@pytest.mark.parametrize('completion,success', [('LLAMA_SMOKE_OK', True), ('unrelated output', False)])
+def test_llama_harness_requires_generated_marker(tmp_path, completion, success):
+    import os
+    import subprocess
+    executable = tmp_path / 'llama-completion'
+    executable.write_text('#!/bin/bash\nif [[ "${1:-}" == --help ]]; then\n'
+                          'echo --no-display-prompt; exit 0; fi\n'
+                          f'echo "{completion}"\n')
+    executable.chmod(0o755)
+    checkpoint = tmp_path / 'test.gguf'
+    checkpoint.write_bytes(b'simulated GGUF; not a real model')
+    environment = dict(os.environ, LLAMA_BIN=str(executable), MODEL=str(checkpoint))
+    result = subprocess.run(['bash', str(ROOT / 'scripts/llama_cpp_load_unload_smoke.sh')],
+                            env=environment, capture_output=True, text=True, timeout=15)
+    assert (result.returncode == 0) == success, result.stdout + result.stderr
+    assert 'LLAMA_SMOKE_OK' not in 'Write the uppercase words LLAMA, SMOKE and OK joined by underscores.'

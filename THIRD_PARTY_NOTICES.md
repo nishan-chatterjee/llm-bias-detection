@@ -1,8 +1,10 @@
 # Third-party data and model notices
 
-The repository's MIT licence applies to the release code unless a file or
-component says otherwise. It does not replace upstream terms for data, model
-checkpoints, model outputs, or evaluation instruments.
+The repository's MIT licence applies to executable code unless a component
+says otherwise. `LICENSE-CC-BY-4.0.md` applies to the authors' original
+documentation, figures, templates, selection/arrangement and analysis tables.
+Neither licence replaces upstream terms for borrowed data, model checkpoints
+or evaluation instruments.
 
 ## IBM Claim Stance
 
@@ -37,11 +39,32 @@ remain subject to those terms.
 
 ## Hate-speech sources
 
-The public companion dataset includes model probabilities, gold labels,
-identity targets, and source metadata from the collaborator's completed run.
-It does not include source statements or the assembled corpus itself. The run
-used 13,320 target-specific rows (1,332 per target); each configuration scored
-one target's 1,332 rows. The exact assembled split, component licences,
-attribution, and checksum remain documented limitations requiring final
-verification. The source documentation associates the material with Yoder et
-al. (CoNLL 2022).
+The completed run's probabilities, labels and source metadata remain unchanged.
+The newly supplied assembled corpus and prompt JSON are now included separately.
+The corpus has 13,320 items, exactly 666 hate and 666 non-hate per primary target.
+Within-target order, labels and source metadata align with all 19,180,800
+archived predictions. Original text/prompt hashes were not recorded.
+
+The corpus is associated with [Yoder et al. (2022)](https://aclanthology.org/2022.conll-1.3/).
+Its preserved `dataset` values identify these sources:
+
+- Gab Hate Corpus (`kennedy2020`, 4,421 rows): CC BY 4.0 according to the
+  [official OSF record](https://osf.io/edua3/), verified through
+  [OSF's licence API](https://api.osf.io/v2/licenses/563c1cf88c5e4a3877f9e96a/).
+- HateXplain (`hatexplain`, 4,326 rows): upstream repository's
+  [MIT licence](https://github.com/hate-alert/HateXplain/blob/master/LICENSE),
+  Copyright (c) 2020 Punyajoy Saha. Its complete notice is retained in
+  `tasks/hate-speech/data/README.md` and the HF input README.
+- Civil Comments (`civilcomments`, 3,051 rows):
+  [Jigsaw's source data statement](https://www.kaggle.com/c/jigsaw-unintended-bias-in-toxicity-classification/data)
+  declares CC0 for both data and underlying comment text.
+- Social Bias Inference Corpus (`sbic`, 1,522 rows): CC BY 4.0 per the
+  [Social Bias Frames card](https://huggingface.co/datasets/allenai/social_bias_frames),
+  attributed to Sap et al. (2020).
+
+Filtering, balancing and primary-target assignment are modifications to the
+source collections. Original file order, `dataset`, `grouping` and `fold` are
+preserved. No original post IDs were supplied; attribution cannot be
+reconstructed per post. Preserve component licences and source attribution;
+the collection's CC BY 4.0 is not a replacement for those terms or for any
+independent privacy/platform rights in underlying posts.

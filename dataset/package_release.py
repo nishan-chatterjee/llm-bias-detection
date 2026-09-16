@@ -20,6 +20,8 @@ import pyarrow.csv as pacsv
 import pyarrow.json as pajson
 import pyarrow.parquet as pq
 
+from materialize_hate_inputs import package_inputs
+
 
 PRIMARY = [
     "gemma-3-1b-it", "gemma-3-4b-it", "gemma-3-12b-it", "gemma-3-27b-it",
@@ -91,6 +93,7 @@ def package(args: argparse.Namespace) -> None:
     # Shared metadata.
     copy(release / "dataset" / "DATASET_CARD.md", stage / "README.md")
     copy(release / "models" / "serve" / "model_config.json", stage / "metadata" / "model_config.json")
+    row_counts.update(package_inputs(stage, release))
 
     # Political Compass MCQ: eight primary models x three quantizations.
     mcq_source = source / "tasks" / "political-compass" / "output" / "mcq-v1-300"
@@ -225,8 +228,8 @@ def package(args: argparse.Namespace) -> None:
         if len(list((stage / "data" / "hate_speech").glob("*.parquet"))) != 8:
             raise ValueError("Historical hate conversion did not produce eight Parquets")
         hate_status = (
-            "eight primary-model item-prediction Parquets included; source text, "
-            "exact prompt file, corpus file, and raw vocabulary logits absent"
+            "eight primary-model item-prediction Parquets included; matching input "
+            "corpus and prompt JSON supplied separately; original raw logits absent"
         )
 
     # Analysis-ready tables let every canonical notebook run from the pinned

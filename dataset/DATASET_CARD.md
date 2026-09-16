@@ -1,5 +1,5 @@
 ---
-license: other
+license: cc-by-4.0
 language:
 - en
 - bg
@@ -29,6 +29,8 @@ configs:
   data_files: data/ibm_sentiment/*.parquet
 - config_name: hate_speech
   data_files: data/hate_speech/*.parquet
+- config_name: hate_speech_inputs
+  data_files: data/hate_speech_inputs/english.parquet
 - config_name: hate_speech_aggregate
   data_files: data/analysis_ready/hate_speech/hs_configuration_scores.parquet
 - config_name: hate_speech_factor_sensitivity
@@ -65,8 +67,18 @@ configs:
 
 # LLM Bias Detection Evaluation Traces
 
-Evaluation data accompanying *Navigating the Digital Spectrum: Assessing
-Political Bias, Moral Values, and Toxicity in LLMs*.
+Evaluation data accompanying *Navigating the digital spectrum: Assessing
+political bias, stability, and downstream fairness in Large Language Models*
+([arXiv:2609.08637](https://arxiv.org/abs/2609.08637)).
+
+**Licence scope:** CC BY 4.0 covers the authors' original documentation,
+templates, selection/arrangement and author-generated tables. It does not
+relicense source text or annotations. IBM retains CC BY-SA 3.0; hate-corpus
+components retain CC BY 4.0, CC0 or MIT as documented in
+`inputs/hate_speech/README.md` and `THIRD_PARTY_NOTICES.md`. Political Compass
+propositions are expressly excluded from the CC grant pending rights review.
+See `LICENSE-CC-BY-4.0.md` for scope and licence links. The repository-wide HF
+badge cannot represent each component's terms; the notices remain binding.
 
 The Dataset contains the model outputs used for Political Compass multiple
 choice and chat experiments, IBM topic sentiment classification, and
@@ -137,13 +149,29 @@ prompt configurations × 1,332 target-specific item positions. Fields include
 assigned persona, sampled identity target, gold hate label, `p_hate`,
 `p_not_hate`, thresholded prediction and source metadata.
 
-The historical handoff does not contain source statements, the exact prompt
-JSON, raw vocabulary logits, or the assembled corpus file. Its wide CSV header
+The historical output Parquets do not embed source statements or raw vocabulary
+logits. Its wide CSV header
 was written from the first target-specific list and later target rows were
 appended positionally. Consequently, `item_index` is one-based within the
 selected target subset and is intentionally not called a global question ID.
 Candidate probabilities were stored at bf16 precision and may sum to one within
 approximately 0.002 rather than exactly.
+
+### `hate_speech_inputs`
+
+The subsequently supplied original JSONL and prompt JSON are now available at
+`inputs/hate_speech/corpus/english.jsonl` and
+`inputs/hate_speech/prompts/english.json`. The Parquet input configuration has
+13,320 records: ten targets × two classes × 666 items. Original file order,
+source fields and the existing `fold` field are preserved. Added `question_id`
+is the one-based input line; `target` is the first assigned target group and
+`item_index` is its one-based within-target position. Join historical predictions
+to these inputs on `(target, item_index)`, not on a global index.
+
+All 19,180,800 archived gold-label/source-metadata rows match this input order.
+That does not prove historical text-byte identity: original outputs have no
+text/prompt hashes. Input checksums and licence attribution are included in
+`inputs/hate_speech/README.md`. No old predictions were regenerated or changed.
 
 ### `hate_speech_aggregate`
 
@@ -252,12 +280,26 @@ assigned persona, model output and gold dataset labels.
 - The IBM 30-topic extract comes from `ibm-research/claim_stance`, pinned at
   revision `ec4e2c2ec3e0c70087c67a28a7bce58b682b8109`. Cite Bar-Haim et al.
   (EACL 2017). The upstream card's prose states CC BY-SA 3.0.
-- The hate-speech source documentation associates the material with Yoder et
-  al. (CoNLL 2022). The public release excludes its source statements; the
-  exact assembled corpus and component licences remain limitations requiring
-  final verification.
+- Hate-speech inputs are associated with Yoder et al. (CoNLL 2022). The
+  supplied corpus is included separately with source attribution and its
+  component licence notices. Archived logits and prompt/text hashes remain
+  unavailable.
 - Model outputs may remain subject to the upstream model licences and terms.
 
-Because components have different or unresolved terms, the combined Dataset
-uses `license: other`. See the GitHub repository's `THIRD_PARTY_NOTICES.md` for
-the complete release notes.
+The HF metadata now displays `cc-by-4.0` for the authors' original contributions.
+It is not a blanket licence over all borrowed material. See the licence scope
+at the top, `LICENSE-CC-BY-4.0.md`, and `THIRD_PARTY_NOTICES.md`.
+
+## Cite the preprint
+
+```bibtex
+@misc{debevc2026navigatingdigitalspectrumassessing,
+  title={Navigating the digital spectrum: Assessing political bias, stability, and downstream fairness in Large Language Models},
+  author={Luka Debevc and Nishan Chatterjee and Antoine Doucet and Senja Pollak and Matej Martinc},
+  year={2026},
+  eprint={2609.08637},
+  archivePrefix={arXiv},
+  primaryClass={cs.CL},
+  url={https://arxiv.org/abs/2609.08637},
+}
+```

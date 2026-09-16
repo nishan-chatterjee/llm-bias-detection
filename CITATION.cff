@@ -7,15 +7,34 @@ authors:
     given-names: Luka
   - family-names: Chatterjee
     given-names: Nishan
-  - family-names: Pollak
-    given-names: Senja
   - family-names: Doucet
     given-names: Antoine
+  - family-names: Pollak
+    given-names: Senja
   - family-names: Martinc
     given-names: Matej
 license: MIT
 repository-code: "https://github.com/nishan-chatterjee/llm-bias-detection"
-url: "https://github.com/nishan-chatterjee/llm-bias-detection/tree/peerj-review-v2"
+url: "https://github.com/nishan-chatterjee/llm-bias-detection/tree/peerj-review-v3"
 repository-artifact: "https://huggingface.co/datasets/nishan-chatterjee/llm-bias-detection"
 date-released: 2026-09-16
-version: "1.1.0"
+version: "1.2.0"
+preferred-citation:
+  type: generic
+  title: "Navigating the digital spectrum: Assessing political bias, stability, and downstream fairness in Large Language Models"
+  authors:
+    - family-names: Debevc
+      given-names: Luka
+    - family-names: Chatterjee
+      given-names: Nishan
+    - family-names: Doucet
+      given-names: Antoine
+    - family-names: Pollak
+      given-names: Senja
+    - family-names: Martinc
+      given-names: Matej
+  year: 2026
+  url: "https://arxiv.org/abs/2609.08637"
+  identifiers:
+    - type: other
+      value: "arXiv:2609.08637"

@@ -28,7 +28,7 @@ def main():
         item predictions, plus the exact 14,400-row configuration aggregate.
 
         **Sensitive-content notice:** the source corpus contains identity-targeted
-        hate speech. The released Parquets do not contain source statements, but
+        hate speech. Historical prediction Parquets do not contain source statements, but
         they do contain target-group labels and source metadata. After
         `scripts/download_dataset.py --component analysis`, the notebook reads
         the pinned Hugging Face analysis tables directly."""),
@@ -182,8 +182,13 @@ def main():
         preserved old renderings are stored only under `legacy/`; they are not
         presented as runnable evidence.
 
-        The released hate-speech Parquets also omit source statements and the
-        exact prompt JSON, so examples cannot be reconstructed from this release."""),
+        Historical prediction Parquets omit source statements and prompt hashes.
+        The separately released `hate_speech_inputs` table and original corpus/
+        prompt files now permit inspection and fresh inference. Join historical
+        rows to inputs by `(target, item_index)`. All labels and source metadata
+        match at these positions, but historical byte identity cannot be proved
+        because text/prompt hashes were not recorded. Source statements contain
+        sensitive language; these diagnostics do not print them by default."""),
     ]
     OUT.parent.mkdir(parents=True,exist_ok=True)
     nbf.write(nb,OUT)

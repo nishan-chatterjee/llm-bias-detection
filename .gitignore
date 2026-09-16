@@ -52,8 +52,8 @@ tasks/political-compass/instrument/political_compass_data.csv
 # Arrow caches of the full upstream test split are unnecessary for this task.
 tasks/sentiment/data/questions/ibm-claim-stance/*.arrow
 
-# Pending colleague handoff and component-license verification.
-tasks/hate-speech/data/corpus/english.jsonl
+# Historical bulky result exports; the validated small corpus is now tracked
+# with its component attribution and licence notices.
 tasks/hate-speech/output_hate_speech/
 
 # Notebook execution caches.

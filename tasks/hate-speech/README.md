@@ -18,8 +18,13 @@ contains eight complete wide model CSVs: 1,800 configurations per model and
 remain outside Git and are converted to long Parquet for the public companion
 Dataset repository.
 
-The handoff does **not** contain the source statements, exact prompt JSON, raw
-vocabulary logits, or assembled corpus file. The historical results contain
+The original handoff did not contain source text or prompts. The subsequently
+supplied `english.jsonl` and `english.json` are now installed under `data/`,
+with input checksums and component notices in `data/README.md`, and published
+in the companion HF input layer. Their within-target ordering, gold labels and
+source metadata match all 19,180,800 archived rows across eight checkpoints.
+Historical outputs contain no text/prompt hashes, so this is metadata alignment,
+not cryptographic proof of historical text identity. The historical results contain
 only candidate-normalized probabilities for literal `True` and `False`, gold
 labels, target labels, and source metadata. These limitations are preserved in
 the released schema rather than inferred or filled in. Because the historical
@@ -29,9 +34,9 @@ differ from one by at most 0.001953125 in the supplied files.
 The historical anonymized package also says that its hate prompt JSON is
 shipped, but the referenced file is actually a Political Compass prompt file:
 its `instructions` field is split into `question_first`/`options_first`, whereas
-the hate runner indexes a list of ten `{text}` templates. The exact hate prompt
-file must therefore also be supplied or confirmed before the raw experiment is
-called fully reproducible. The clean runner fails loudly on this mismatch.
+the hate runner indexes a list of ten `{text}` templates. The newly supplied
+file has the correct list schema and passes preflight; it is not that mismatched
+Political Compass file.
 
 Expected local files:
 
@@ -49,7 +54,7 @@ target per configuration and scored its 1,332 corresponding rows.
 ## Run
 
 The release wrapper defaults to four GPUs, preserves the historical model-block
-order used to assign configuration IDs, validates both unreleased inputs, and
+order used to assign configuration IDs, validates both included inputs, and
 runs the eight checkpoints sequentially with resumable outputs:
 
 ```bash
@@ -59,10 +64,15 @@ GPU_IDS=0,1,2,3 bash tasks/hate-speech/mcq.sh run
 ```
 
 `GPU_IDS=0,1,2,3 bash tasks/hate-speech/run_experiments.sh all` combines those
-steps. `DRY_RUN=1` prints the exact Python invocations. Because the exact corpus
-and prompt file are absent from the current public release, `preflight` is
-expected to fail until collaborators supply the two documented files; this is
-an explicit reproducibility limitation rather than an optional setup step.
+steps. `DRY_RUN=1` prints the exact Python invocations. `preflight` now passes
+from a clean checkout because both input files are included. The input corpus
+and prompt JSON can also be obtained from HF with:
+
+```bash
+python scripts/download_dataset.py --component hate-inputs --install-hate-inputs
+```
+
+Installation checks file hashes and refuses to overwrite different local files.
 
 ```bash
 python tasks/hate-speech/run_hate_speech.py validate-inputs
@@ -158,5 +168,6 @@ The historical schedule selects one of ten identity targets. Its corresponding
 token logits for literal `True` and `False`. The collaborator CSV handoff was
 converted to long Parquet by configuration and one-based within-target item
 position. The conversion preserves supplied labels, source metadata, targets,
-and bf16-rounded probabilities; it does not reconstruct missing text, raw
-vocabulary logits, or global item IDs.
+and bf16-rounded probabilities. Source text is supplied separately and joined
+by `(target, item_index)`; original raw vocabulary logits and text/prompt hashes
+were not recorded and cannot be reconstructed.

@@ -1,7 +1,8 @@
 # LLM Bias Detection
 
-Code and data release for *Navigating the Digital Spectrum: Assessing
-Political Bias, Moral Values, and Toxicity in LLMs*. This repository preserves
+Code and data release for *Navigating the digital spectrum: Assessing political
+bias, stability, and downstream fairness in Large Language Models*
+([arXiv:2609.08637](https://arxiv.org/abs/2609.08637)). This repository preserves
 the released PoliLean evaluation code and history under a more descriptive,
 public-facing project name.
 
@@ -96,8 +97,9 @@ four-GPU task launchers, and optional vLLM/llama.cpp servers, see
 aggregations and known working-manuscript corrections are documented in
 [`docs/MANUSCRIPT_RESULTS_AUDIT.md`](docs/MANUSCRIPT_RESULTS_AUDIT.md).
 
-The new portable workflow is pinned by code tag `peerj-review-v2` and Dataset
-revision `5de60e66bf07f0612b5b8a8daaf2e1b86bc2638c`. See
+The latest workflow is pinned by code tag `peerj-review-v3`; the companion
+Dataset commit is `97f424a5bd962b12b9258c338130b77b4f75b34a`, also pinned in
+`scripts/download_dataset.py`. See
 [`docs/POLITICAL_COMPASS_RIGHTS.md`](docs/POLITICAL_COMPASS_RIGHTS.md) for the
 unresolved rights issue affecting full proposition text already in raw outputs.
 The compact `--component analysis` download avoids that text.
@@ -109,7 +111,8 @@ Experimental multi-LLM judge annotations are not used as headline evidence.
 
 ## Data
 
-The Hugging Face release has five raw-output configurations, two historical
+The Hugging Face release has five raw-output configurations, one input
+configuration, two historical
 aggregate configurations, and fourteen single-table analysis configurations:
 
 | Configuration | Contents |
@@ -119,6 +122,7 @@ aggregate configurations, and fourteen single-table analysis configurations:
 | `political_compass_chat_ablation` | matched Gemma 27B abliterated diagnostic |
 | `ibm_sentiment` | 432,000 topic-sentiment predictions |
 | `hate_speech` | 19,180,800 item predictions in 8 Parquets |
+| `hate_speech_inputs` | 13,320 source items with `(target, item_index)` join keys |
 | `hate_speech_aggregate` | 14,400 configuration summaries |
 | `hate_speech_factor_sensitivity` | eight-row historical sensitivity table |
 | `analysis_pct_*` | derived MCQ/chat coordinates, Stage-1/2 agreement, and sensitivity tables |
@@ -132,10 +136,13 @@ multiple choice and contains no generated rationale. Historical MCQ and hate
 files contain candidate-normalized probabilities, not complete vocabulary
 logits.
 
-The hate-speech handoff does not include source statements, the exact prompt
-JSON, or the assembled corpus. `item_index` is therefore a stable position
-within the selected target subset and must not be interpreted as a global
-question identifier.
+The original hate-speech handoff omitted source statements and prompts; the
+subsequently supplied input files are now included under
+`tasks/hate-speech/data/` and in the HF `hate_speech_inputs` layer. Their
+within-target order, labels and source metadata match all 19,180,800 archived
+predictions. The original output `item_index` remains a within-target position,
+not a global question ID; join on `(target, item_index)`. Historical outputs
+still contain no raw logits or text/prompt hashes.
 
 ## Reproduce from a clean checkout
 
@@ -283,11 +290,11 @@ four matched Qwen thinking variants. Outputs are written beneath the task's
 ignored `output/` directory. Set `OUTPUT_ROOT` to use scratch storage. Set
 `DRY_RUN=1` to print every underlying Python command without launching models.
 
-Fresh hate-speech inference additionally requires the exact corpus and prompt
-files documented in `tasks/hate-speech/README.md`. These source texts were not
-part of the collaborator result handoff or the public dataset, so the wrapper's
-preflight intentionally stops until they are supplied. The released predictions
-and their analysis remain reproducible without those source texts.
+Fresh hate-speech inference uses the corpus and prompt files now included at
+the canonical paths documented in `tasks/hate-speech/README.md`. Their labels
+and source metadata align with all archived output positions. The same files
+are available through the companion dataset's `hate_speech_inputs` configuration
+and `inputs/hate_speech/` directory; historical outputs and metrics are unchanged.
 
 ### 6. Reproduce the analyses
 
@@ -368,6 +375,18 @@ Political Compass instrument is available at
 citations and licences are listed in `THIRD_PARTY_NOTICES.md` and the component
 READMEs.
 
+```bibtex
+@misc{debevc2026navigatingdigitalspectrumassessing,
+  title={Navigating the digital spectrum: Assessing political bias, stability, and downstream fairness in Large Language Models},
+  author={Luka Debevc and Nishan Chatterjee and Antoine Doucet and Senja Pollak and Matej Martinc},
+  year={2026},
+  eprint={2609.08637},
+  archivePrefix={arXiv},
+  primaryClass={cs.CL},
+  url={https://arxiv.org/abs/2609.08637},
+}
+```
+
 ## Contributing
 
 See `CONTRIBUTING.md`. Contributions must preserve deterministic designs,
@@ -386,8 +405,8 @@ speech. Their presence is part of the evaluation and is not an endorsement.
   they are not causal effects.
 - Four checkpoints per family do not establish general model-size laws.
 - The IBM analysis excludes the discarded LLM-authored target taxonomy.
-- The public Dataset excludes hate-speech source text and raw vocabulary
-  logits; component licences and provenance remain documented limitations.
+- Hate-speech source text is now supplied separately; archived outputs still
+  lack raw vocabulary logits and historical text/prompt hashes.
 - Political Compass propositions remain subject to their upstream terms. The
   scorer parameters are not redistributed.
 
@@ -396,6 +415,15 @@ attribution and rights notes.
 
 ## Licence
 
-Code is currently released under MIT, subject to final joint-author review.
-Datasets, model outputs, and upstream models retain their own licences and
-terms.
+Executable code remains [MIT](LICENSE). The authors' original documentation,
+figures, templates, selection/arrangement and author-generated analysis tables
+are [CC BY 4.0](LICENSE-CC-BY-4.0.md). Third-party content retains its component
+terms, including IBM CC BY-SA 3.0, hate-corpus component licences, and the
+unresolved Political Compass rights exclusion.
+
+[![Documentation and author-generated data: CC BY 4.0](https://img.shields.io/badge/docs%20%26%20author%20data-CC%20BY%204.0-lightgrey)](LICENSE-CC-BY-4.0.md)
+
+This split follows [Creative Commons' software guidance](https://creativecommons.org/faq/#can-i-apply-a-creative-commons-license-to-software)
+and [PeerJ's policy](https://peerj.com/about/policies-and-procedures/), which
+requires an open-source licence for software and publishes articles under CC
+BY. It does not assert that every borrowed dataset is relicensed CC BY.

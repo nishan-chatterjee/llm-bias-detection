@@ -187,6 +187,14 @@ def validate(stage: Path) -> None:
     topics = pd.read_csv(stage / "inputs" / "ibm_sentiment" / "ibm_test_topics.csv")
     assert len(topics) == 30
     assert topics["topicSentiment"].value_counts().to_dict() == {1: 19, -1: 11}
+    # New source inputs are separate from unchanged historical predictions.
+    inputs = pq.read_table(stage / 'data/hate_speech_inputs/english.parquet').to_pandas()
+    assert len(inputs) == 13_320
+    assert inputs.groupby(['target', 'hate']).size().eq(666).all()
+    assert not inputs.duplicated(['target', 'item_index']).any()
+    assert np.array_equal(inputs.question_id.to_numpy(), np.arange(1, 13_321))
+    assert (stage / 'inputs/hate_speech/prompts/english.json').is_file()
+    assert (stage / 'inputs/hate_speech/corpus/english.jsonl').is_file()
     print(f"Validated {len(manifest)} manifested files in {stage}")
 
 
