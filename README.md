@@ -94,6 +94,12 @@ four-GPU task launchers, and optional vLLM/llama.cpp servers, see
 aggregations and known working-manuscript corrections are documented in
 [`docs/MANUSCRIPT_RESULTS_AUDIT.md`](docs/MANUSCRIPT_RESULTS_AUDIT.md).
 
+The new portable workflow is pinned by code tag `peerj-review-v2` and Dataset
+revision `5de60e66bf07f0612b5b8a8daaf2e1b86bc2638c`. See
+[`docs/POLITICAL_COMPASS_RIGHTS.md`](docs/POLITICAL_COMPASS_RIGHTS.md) for the
+unresolved rights issue affecting full proposition text already in raw outputs.
+The compact `--component analysis` download avoids that text.
+
 The Political Compass qualitative-analysis directory contains the localized
 chat diagnostics used in the paper. Predefined cue matches are reported as
 qualifying-language diagnostics rather than human-validated hedging labels.

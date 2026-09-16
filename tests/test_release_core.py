@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -10,6 +12,14 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+@pytest.mark.parametrize('task', ['sentiment', 'hate-speech'])
+def test_public_mcq_entrypoint_help(task):
+    completed = subprocess.run([sys.executable, str(ROOT / 'tasks' / task / 'mcq.py'),
+                                '--help'], capture_output=True, text=True)
+    assert completed.returncode == 0, completed.stderr
+    assert 'generate-design' in completed.stdout
 
 
 def load_module(name: str, path: Path):
