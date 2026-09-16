@@ -188,6 +188,15 @@ def main():
     OUT.parent.mkdir(parents=True,exist_ok=True)
     nbf.write(nb,OUT)
     print(OUT)
+    # Keep the historical short entry notebook runnable rather than displaying
+    # a cached PNG as if it were a newly computed result.
+    short=nbf.v4.new_notebook(metadata=nb.metadata)
+    short.cells=[md('''# Hate-speech factor sensitivity — primary models
+
+    This compact entry uses the same portable data and computed heatmap as the
+    complete notebook. Components are descriptive SD-sized spreads, not
+    independent causal variance components.'''),nb.cells[1],nb.cells[-3],nb.cells[-2]]
+    nbf.write(short,OUT.parent/'01_hate_speech_factor_sensitivity.ipynb')
 
 
 if __name__=='__main__': main()

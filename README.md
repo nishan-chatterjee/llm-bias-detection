@@ -25,6 +25,8 @@ personas are experimental prompt conditions, not intrinsic model identities.
 
 ### Multiple-choice protocol
 
+This overview includes the full fourteen-language × three-precision design.
+
 ![Political Compass MCQ positions](tasks/political-compass/selected-visuals/political_compass_mcq_only.png)
 
 ### Chat protocols
