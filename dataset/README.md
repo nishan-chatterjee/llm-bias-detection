@@ -15,8 +15,10 @@ python dataset/validate_release.py /tmp/llm-bias-detection-hf-staging
 The packager refuses the deprecated proposition-export flag. Provide any
 authorized questionnaire files locally for inference; do not publish them in
 this dataset or a public supplemental-code ZIP. The uploader also refuses a
-public stage containing a `restricted_inputs/` directory. This guard does not
-clear rights over text embedded in raw chat traces.
+public stage containing a `restricted_inputs/` directory or the old raw chat
+directories. Chat exports use an explicit numerical-column allow-list, without
+questionnaire, prompt, response or error text, and the public uploader rejects
+unexpected columns/schema metadata. Raw originals remain local.
 
 The hate conversion validates the supplied design, eight primary models,
 1,800 configurations per model, 1,332 item positions per configuration, and

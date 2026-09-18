@@ -24,11 +24,11 @@ explicit redistribution clearance. The supplied code does not grant rights to
 use or redistribute that material.
 
 The `restricted_inputs/` question directory is removed from the current public
-dataset tree. Older revisions may retain it; no history erasure is claimed.
-Raw chat records can also contain proposition text in statements, prompts,
-responses and metadata, so directory removal alone is not complete text removal.
+dataset tree. Raw chat/ablation files are also withheld, replaced by numerical
+projections without questionnaire/prompt/response text. HF main history is
+squashed after withdrawal; existing downloads or host caches cannot be recalled.
 No redistribution permission has been established. See the dataset card for
-the current public trace scope and the [official FAQ](https://www.politicalcompass.org/faq)
+the current numerical release scope and the [official FAQ](https://www.politicalcompass.org/faq)
 for upstream terms. The portable aggregate analysis download avoids raw text.
 
 ## Model checkpoints and outputs

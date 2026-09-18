@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_REPO = "nishan-chatterjee/llm-bias-detection"
 DEFAULT_TARGET = ROOT / "data" / "release"
-DEFAULT_REVISION = "33a2f02a19eeea7ddd42706d8a5d6f3e26ac2ea2"
+DEFAULT_REVISION = "8f2f3205a2eb8796d300fde75eee8254475d00bb"
 COMPONENT_PATTERNS = {
     "inputs": ["README.md", "inputs/**", "metadata/**",
                "LICENSE-CC-BY-4.0.md", "THIRD_PARTY_NOTICES.md"],
@@ -119,7 +119,8 @@ def main() -> None:
             revision=args.revision,
             local_dir=target,
             allow_patterns=COMPONENT_PATTERNS.get(args.component),
-            ignore_patterns=['restricted_inputs/**'],
+            ignore_patterns=['restricted_inputs/**', 'data/political_compass_chat/**',
+                             'data/political_compass_chat_ablation/**'],
         )
     )
     if args.install_pct_questions:

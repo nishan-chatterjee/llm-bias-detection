@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import pyarrow.compute as pc
 import pyarrow.parquet as pq
+from chat_numeric import CHAT_NUMERIC_COLUMNS
 
 
 PRIMARY = {
@@ -58,7 +59,10 @@ def validate(stage: Path) -> None:
     assert not forbidden, forbidden
 
     mcq_files = sorted((stage / "data" / "political_compass_mcq").glob("*.parquet"))
-    chat_files = sorted((stage / "data" / "political_compass_chat").glob("*.parquet"))
+    assert not (stage / 'restricted_inputs').exists()
+    assert not (stage / 'data/political_compass_chat').exists()
+    assert not (stage / 'data/political_compass_chat_ablation').exists()
+    chat_files = sorted((stage / "data" / "political_compass_chat_numeric").glob("*.parquet"))
     ibm_files = sorted((stage / "data" / "ibm_sentiment").glob("*.parquet"))
     hate_files = sorted((stage / "data" / "hate_speech").glob("*.parquet"))
     assert len(mcq_files) == 24
@@ -109,14 +113,16 @@ def validate(stage: Path) -> None:
         table = pq.read_table(
             path,
             columns=[
-                "config_id", "question_id", "error", "classification_probs",
-                "stage1_text", "classification_logprobs", "statement",
+                "config_id", "question_id", "has_error", "classification_probs",
+                "classification_logprobs",
             ],
         )
         # 1,800 prompt configurations x 62 propositions per chat variant.
         assert table.num_rows == 111_600, (path, table.num_rows)
-        assert {"stage1_text", "classification_logprobs", "classification_probs", "statement"}.issubset(table.column_names)
-        assert table["error"].null_count == table.num_rows, path
+        schema = pq.read_schema(path)
+        assert set(schema.names) == set(CHAT_NUMERIC_COLUMNS) | {'has_error'}
+        assert schema.metadata is None
+        assert not pc.any(table['has_error']).as_py(), path
         pairs = np.asarray(table["config_id"]) * 100 + np.asarray(table["question_id"])
         assert len(np.unique(pairs)) == table.num_rows, path
         assert len(np.unique(np.asarray(table["config_id"]))) == 1800, path
@@ -174,7 +180,7 @@ def validate(stage: Path) -> None:
         assert len(np.unique(pairs // 2_000)) == 1_800, path
 
     ablation_files = sorted(
-        (stage / "data" / "political_compass_chat_ablation").glob("*.parquet")
+        (stage / "data" / "political_compass_chat_ablation_numeric").glob("*.parquet")
     )
     assert len(ablation_files) <= 1
     if ablation_files:

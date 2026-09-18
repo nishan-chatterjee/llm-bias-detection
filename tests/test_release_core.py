@@ -439,3 +439,42 @@ def test_code_supplement_excludes_editorial_legacy_and_restricted_material():
     for path in ['README.md', 'tasks/hate-speech/data/corpus/english.jsonl',
                  'tasks/political-compass/analysis/notebooks/02_chat_analysis_primary_models.ipynb']:
         assert not module.excluded(path)
+
+
+def test_chat_projection_preserves_scores_and_excludes_free_text():
+    import pyarrow as pa
+    module = load_module('chat_numeric_projection', ROOT / 'dataset/chat_numeric.py')
+    values = {column: [0, 1] for column in module.CHAT_NUMERIC_COLUMNS}
+    values['classification_probs'] = [{'A': 0.25, 'B': 0.75}] * 2
+    values.update({column: ['WITHHELD QUESTION WORDING'] * 2 for column in
+                   ('statement', 'premise', 'prompt', 'stage1_text', 'item_metadata')})
+    values['error'] = [None, 'WITHHELD ERROR QUOTING A QUESTION']
+    raw = pa.table(values).replace_schema_metadata({b'prompt': b'WITHHELD METADATA'})
+    result = module.numeric_chat_table(raw)
+    assert set(result.column_names) == set(module.CHAT_NUMERIC_COLUMNS) | {'has_error'}
+    assert result.schema.metadata is None
+    assert result['has_error'].to_pylist() == [False, True]
+    for column in module.CHAT_NUMERIC_COLUMNS:
+        assert result[column].equals(raw[column])
+    assert 'WITHHELD' not in str(result.to_pylist())
+
+
+@pytest.mark.parametrize('relative', ['restricted_inputs', 'data/political_compass_chat',
+                                     'data/political_compass_chat_ablation'])
+def test_public_upload_refuses_withheld_directories(tmp_path, relative):
+    module = load_module('guard_public_chat', ROOT / 'dataset/upload_private.py')
+    (tmp_path / relative).mkdir(parents=True)
+    with pytest.raises(ValueError, match='Refusing to publish'):
+        module.check_public_stage(tmp_path)
+
+
+def test_public_upload_refuses_text_inside_numeric_directory(tmp_path, monkeypatch):
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    monkeypatch.syspath_prepend(str(ROOT / 'dataset'))
+    module = load_module('guard_numeric_schema', ROOT / 'dataset/upload_private.py')
+    path = tmp_path / 'data/political_compass_chat_numeric/x.parquet'
+    path.parent.mkdir(parents=True)
+    pq.write_table(pa.table({'stage1_text': ['WITHHELD TEXT']}), path)
+    with pytest.raises(ValueError, match='Unexpected fields'):
+        module.check_public_stage(tmp_path)

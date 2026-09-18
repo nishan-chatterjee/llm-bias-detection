@@ -4,7 +4,8 @@ Code and data release for *Navigating the digital spectrum: Assessing political
 bias, stability, and downstream fairness in Large Language Models*
 ([arXiv:2609.08637](https://arxiv.org/abs/2609.08637)). This repository preserves
 the released PoliLean evaluation code and history under a more descriptive,
-public-facing project name.
+public-facing project name. Published history has been rewritten to remove
+editorial files under `docs/`; private backups preserve the original history.
 
 The release evaluates how political-persona prompts and prompt-format choices
 affect open-weight language models on three tasks:
@@ -15,6 +16,82 @@ affect open-weight language models on three tasks:
 
 Large evaluation traces are hosted in the companion Hugging Face Dataset:
 [nishan-chatterjee/llm-bias-detection](https://huggingface.co/datasets/nishan-chatterjee/llm-bias-detection).
+
+## Reproduction: start here
+
+There are two routes. **Reproduce the released numerical analyses** needs no
+GPU, model weights, questionnaire, or scorer. **Run fresh experiments** needs
+models, task inputs, GPUs, and an authorized local Political Compass scorer.
+
+```mermaid
+flowchart TD
+    A[Clone this release] --> B[Create analysis and inference environments]
+    B --> C{Which route?}
+    C -->|Reproduce released results| D[Download HF analysis tables]
+    D --> K[Run analysis notebooks and number checks]
+    C -->|Run fresh experiments| E[Download pinned Gemma 3 and Qwen3 checkpoints]
+    E --> F[Prepare authorized Political Compass questions and local scorer]
+    E --> G[Prepare IBM sentiment and hate-speech inputs]
+    F --> H[Create deterministic LHS configuration grids]
+    G --> H
+    H --> I[Run MCQ on three tasks; chat and chat-think on Political Compass]
+    I --> J[Validate predictions and derive analysis tables]
+    J --> K
+```
+
+1. **Clone and choose the release.**
+
+   ```bash
+   git clone https://github.com/nishan-chatterjee/llm-bias-detection.git
+   cd llm-bias-detection
+   git checkout peerj-review-v6
+   ```
+
+2. **Create environments** using `environment-analysis.yml` and
+   `environment-inference.yml` (commands below).
+3. **Analysis-only route:** activate `polilean-analysis`, run
+   `python scripts/download_dataset.py --component analysis`, then follow
+   [Reproduce the analyses](#6-reproduce-the-analyses). This rebuilds the
+   canonical numerical figures, not withheld-text qualitative diagnostics.
+4. **Fresh-inference route:** activate `polilean-inference` and run
+   `python scripts/download_models.py --models all`. Gemma access requires
+   accepting its upstream terms and authenticating where required.
+5. **Prepare Political Compass inputs locally**, subject to authorization and
+   the [website terms](https://www.politicalcompass.org/faq). The MCQ runner
+   expects 14 language files at
+   `tasks/political-compass/data/questions/<language>.json`; chat uses English.
+   Input shape is documented in the [task README](tasks/political-compass/README.md).
+   The release does **not** supply a question scraper or automate submissions
+   to the website. To reconstruct the scorer, first obtain an authorized
+   profile/coordinate table at
+   `tasks/political-compass/instrument/political_compass_data.csv`, then fit
+   the [reconstruction notebook](tasks/political-compass/instrument/reconstruct_scoring_function.ipynb)
+   with `POLILEAN_ENABLE_SCORER_RECONSTRUCTION=1` and validate with
+   `python tasks/political-compass/instrument/verify_instrument.py`.
+   The published reconstruction used **372 response profiles** (322 train,
+   50 held out); these are different from the **300 prompt configurations per
+   model/persona** used in the experiments. Website collection is a separate,
+   authorization-dependent prerequisite, not a runnable step supplied here.
+6. **Prepare the other task inputs.** The exact IBM 30-topic extract is already
+   included at `tasks/sentiment/data/questions/ibm-claim-stance/ibm_test_topics.csv`;
+   no added taxonomy or stance experiments are required. The hate-speech corpus
+   and prompt templates are included at `tasks/hate-speech/data/corpus/english.jsonl`
+   and `tasks/hate-speech/data/prompts/english.json`. To restore those exact hate
+   inputs from HF, use `python scripts/download_dataset.py --component hate-inputs
+   --install-hate-inputs` on one line. See the task READMEs and notices for
+   upstream datasets, preprocessing and component licenses.
+7. **Generate designs, query models, and analyze** using the staged commands
+   below. Political Compass supports `mcq`, `chat` and `chat-think`; IBM sentiment
+   and hate speech are MCQ tasks, not chat experiments. Fresh outputs remain
+   local. Public chat exports retain numerical scores and IDs but omit prompts,
+   responses and questionnaire wording.
+
+For analysis-only verification, finish with:
+
+```bash
+conda activate polilean-analysis
+python scripts/verify_manuscript_results.py --dataset-root data/release
+```
 
 ## Political Compass visual overview
 
@@ -94,7 +171,7 @@ The workflow below covers data download, checkpoint placement, task launchers
 and notebook execution. Task READMEs give task-specific details. Recompute the
 release-facing numerical checks with `scripts/verify_manuscript_results.py`.
 
-The latest code release is `peerj-review-v5`; the companion dataset revision is
+The latest code release is `peerj-review-v6`; the companion dataset revision is
 pinned in `scripts/download_dataset.py`. Third-party rights and attribution
 are documented in `THIRD_PARTY_NOTICES.md`. The compact `--component analysis`
 download uses numerical derived tables, without the original questionnaire.
@@ -103,13 +180,15 @@ The PeerJ supplemental-code ZIP contains the canonical source, environments,
 tests, compact analysis tables, notebooks with preserved outputs, and licensed
 hate-speech inputs. It excludes `legacy/` historical files, editorial/release
 notes formerly under `docs/`, model weights, scorer parameters and restricted
-questionnaire inputs. Historical code remains available on GitHub; no history
-was rewritten. Notebook figures are retained at their existing resolution.
+questionnaire inputs and raw Political Compass chat text. Historical code
+remains available on GitHub with `docs/` removed from published branches/tags.
+Notebook figures are retained at their existing resolution. Existing clones,
+downloads or host caches cannot be recalled by rewriting repository history.
 
 Build the <30 MB code subset from the release tag without changing file bytes:
 
 ```bash
-python scripts/build_code_supplement.py --revision peerj-review-v5 \
+python scripts/build_code_supplement.py --revision peerj-review-v6 \
   --output /absolute/path/to/a-new-code.zip
 ```
 
@@ -120,15 +199,15 @@ Experimental multi-LLM judge annotations are not used as headline evidence.
 
 ## Data
 
-The Hugging Face release has five raw-output configurations, one input
+The Hugging Face release has five numerical-output configurations, one input
 configuration, two historical
 aggregate configurations, and fourteen single-table analysis configurations:
 
 | Configuration | Contents |
 |---|---|
 | `political_compass_mcq` | 8 models × bf16/8-bit/4-bit MCQ outputs |
-| `political_compass_chat` | 4 Gemma chat and 8 Qwen think/no-think traces |
-| `political_compass_chat_ablation` | matched Gemma 27B abliterated diagnostic |
+| `political_compass_chat_numeric` | text-free scores/IDs/token counts for 4 Gemma and 8 Qwen chat variants |
+| `political_compass_chat_ablation_numeric` | text-free matched Gemma 27B diagnostic |
 | `ibm_sentiment` | 432,000 topic-sentiment predictions |
 | `hate_speech` | 19,180,800 item predictions in 8 Parquets |
 | `hate_speech_inputs` | 13,320 source items with `(target, item_index)` join keys |
@@ -138,9 +217,10 @@ aggregate configurations, and fourteen single-table analysis configurations:
 | `analysis_ibm_*` | compact coverage, metric, factor, and topic tables |
 | `analysis_hate_*` | compact configuration, item, calibration, and factor tables |
 
-The Political Compass chat traces include prompts, visible Stage-1 answers,
-token counts, finish reasons, and Stage-2 candidate scores. Stage 2 scores the
-answer candidates; it does not generate another rationale. The IBM task is
+The public Political Compass chat files contain IDs, factors, token counts,
+finish reasons, and Stage-2 candidate log-probabilities/probabilities. Raw prompts,
+Stage-1 answers, questionnaire wording and free-text errors are withheld. Stage 2
+scores answer candidates; it does not generate another rationale. The IBM task is
 multiple choice and contains no generated rationale. Historical MCQ and hate
 files contain candidate-normalized probabilities, not complete vocabulary
 logits.
@@ -215,7 +295,7 @@ The downloaded result configurations remain in:
 
 ```text
 data/release/data/political_compass_mcq/
-data/release/data/political_compass_chat/
+data/release/data/political_compass_chat_numeric/
 data/release/data/ibm_sentiment/
 data/release/data/hate_speech/
 data/release/data/hate_speech_aggregate/
@@ -226,7 +306,7 @@ The Political Compass items are third-party copyrighted material. The official
 FAQ restricts unauthorized adoption/adaptation; attribution is not permission.
 Questionnaire files are not included in this code supplement and the
 `restricted_inputs/` directory is no longer part of the dataset's current tree.
-Historical dataset revisions may retain older copies. Analysis uses released
+HF main history has been squashed after withholding raw text. Analysis uses released
 derived coordinates and does not need the proposition files. Fresh inference
 requires an authorized local copy in
 `tasks/political-compass/data/questions/<language>.json`; obtain it under the
@@ -236,9 +316,10 @@ upstream terms rather than through this release:
 python scripts/verify_setup.py --require-pct-inputs
 ```
 
-Obtain written clearance before redistributing the propositions. Removing a
-questionnaire directory alone does not remove text embedded in historical chat
-prompts, responses or metadata; the dataset card records the public trace scope.
+Obtain written clearance before redistributing the propositions or raw traces
+that repeat them. Public numerical projections omit that text; raw originals
+are retained locally. Existing downloads and host caches are not recalled by
+history cleanup; no claim of universal erasure is made.
 
 ### 4. Understand the inference backends
 
@@ -342,6 +423,12 @@ Political Compass coordinates require the locally reconstructed scorer. The
 repository includes the reconstruction notebook and verification code, but
 does not redistribute the generated `.npz` parameters. The released derived
 coordinates allow the canonical notebooks to run without that file.
+
+Question-level qualitative notebooks that inspect generated text cannot be
+fully rerun from the public numerical projection. They require locally held
+authorized raw traces; this limitation is intentional and is not solved by
+the coordinate tables. Qualitative examples are diagnostics, not a release of
+the full questionnaire or a human-validated hedging annotation dataset.
 
 ## Methodology and preprocessing
 

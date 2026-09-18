@@ -21,6 +21,7 @@ import pyarrow.json as pajson
 import pyarrow.parquet as pq
 
 from materialize_hate_inputs import package_inputs
+from chat_numeric import numeric_chat_table
 
 
 PRIMARY = [
@@ -141,19 +142,20 @@ def package(args: argparse.Namespace) -> None:
     chat_design.to_csv(chat_design_path, index=False)
     row_counts[str(chat_design_path.relative_to(stage))] = len(chat_design)
     for variant in CHAT_VARIANTS:
-        target = stage / "data" / "political_compass_chat" / f"{variant}.parquet"
-        row_counts[str(target.relative_to(stage))] = jsonl_to_parquet(
-            chat_source / f"{variant}.jsonl", target
-        )
+        target = stage / "data" / "political_compass_chat_numeric" / f"{variant}.parquet"
+        table = numeric_chat_table(pajson.read_json(chat_source / f"{variant}.jsonl"))
+        target.parent.mkdir(parents=True, exist_ok=True)
+        pq.write_table(table, target, compression="zstd", compression_level=5)
+        row_counts[str(target.relative_to(stage))] = table.num_rows
     if args.include_ablation:
-        target = stage / "data" / "political_compass_chat_ablation" / f"{ABLATION}.parquet"
-        row_counts[str(target.relative_to(stage))] = jsonl_to_parquet(
-            chat_source / f"{ABLATION}.jsonl", target
-        )
+        target = stage / "data" / "political_compass_chat_ablation_numeric" / f"{ABLATION}.parquet"
+        table = numeric_chat_table(pajson.read_json(chat_source / f"{ABLATION}.jsonl"))
+        target.parent.mkdir(parents=True, exist_ok=True)
+        pq.write_table(table, target, compression="zstd", compression_level=5)
+        row_counts[str(target.relative_to(stage))] = table.num_rows
 
-    # Prompt templates are original experiment metadata. Proposition files are
-    # Staged under an explicitly restricted path pending Political Compass
-    # redistribution review. Do not mirror this folder independently.
+    # Original prompt templates may be exported, but not proposition files or
+    # raw chat traces containing the questionnaire wording.
     for path in sorted((source / "tasks" / "political-compass" / "data" / "prompts").glob("*.json")):
         copy(path, stage / "inputs" / "political_compass" / "prompts" / path.name)
     copy(
@@ -273,6 +275,7 @@ def package(args: argparse.Namespace) -> None:
         "included_secondary_ablation": bool(args.include_ablation),
         "political_compass_propositions_included_restricted": bool(args.include_restricted_pct_inputs),
         "political_compass_scorer_included": False,
+        "political_compass_chat_raw_text_included": False,
         "model_weights_included": False,
         "hate_speech_item_predictions_status": hate_status,
         "row_counts": row_counts,

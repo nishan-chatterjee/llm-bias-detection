@@ -21,10 +21,10 @@ pretty_name: LLM Bias Detection Evaluation Traces
 configs:
 - config_name: political_compass_mcq
   data_files: data/political_compass_mcq/*.parquet
-- config_name: political_compass_chat
-  data_files: data/political_compass_chat/*.parquet
-- config_name: political_compass_chat_ablation
-  data_files: data/political_compass_chat_ablation/*.parquet
+- config_name: political_compass_chat_numeric
+  data_files: data/political_compass_chat_numeric/*.parquet
+- config_name: political_compass_chat_ablation_numeric
+  data_files: data/political_compass_chat_ablation_numeric/*.parquet
 - config_name: ibm_sentiment
   data_files: data/ibm_sentiment/*.parquet
 - config_name: hate_speech
@@ -80,7 +80,7 @@ propositions are expressly excluded from the CC grant pending rights review.
 See `LICENSE-CC-BY-4.0.md` for scope and licence links. The repository-wide HF
 badge cannot represent each component's terms; the notices remain binding.
 
-The Dataset contains the model outputs used for Political Compass multiple
+The Dataset contains numerical outputs for Political Compass multiple
 choice and chat experiments, IBM topic sentiment classification, and
 identity-targeted hate-speech detection. Reproduction and analysis code is in
 the [LLM Bias Detection GitHub repository](https://github.com/nishan-chatterjee/llm-bias-detection).
@@ -114,22 +114,24 @@ logits. The learned Political Compass scorer is not included; released
 configuration-level coordinates and reconstruction code are available in the
 GitHub repository.
 
-### `political_compass_chat`
+### `political_compass_chat_numeric`
 
 Twelve Parquet files: four Gemma chat variants and four Qwen checkpoints in
 think/no-think modes. Each variant has 111,600 question rows: 1,800 prompt
 configurations × 62 propositions.
 
-Rows include the prompt, visible Stage-1 response, token count, finish reason,
-candidate log-probabilities and candidate probabilities. Stage 2 scores the
-answer candidates and does not produce a second rationale. Qwen thinking traces
-contain the visible model output returned by the experiment; they should not be
-treated as privileged hidden reasoning.
+Rows retain IDs, experimental factors, token counts, finish reasons,
+candidate log-probabilities and candidate probabilities. An explicit allow-list
+projection omits statement, premise, prompt, Stage-1 response, classification
+suffix, candidate wording, item metadata and free-text errors; schema metadata
+is stripped. `has_error` replaces the original error text. Every retained column
+is copied unchanged from the raw files. These are numerical projections, not
+the full chat traces. Stage 2 scores answer candidates and produces no rationale.
 
-### `political_compass_chat_ablation`
+### `political_compass_chat_ablation_numeric`
 
 A separate matched Gemma 3 27B abliterated-checkpoint diagnostic. It is not
-part of the eight-model primary comparison.
+part of the eight-model primary comparison. The same text-free projection applies.
 
 ### `ibm_sentiment`
 
@@ -203,7 +205,7 @@ from datasets import load_dataset
 
 chat = load_dataset(
     "nishan-chatterjee/llm-bias-detection",
-    "political_compass_chat",
+    "political_compass_chat_numeric",
 )
 ```
 
@@ -244,14 +246,17 @@ The `metadata/` directory contains:
 Prompt templates and the IBM 30-topic extract are under `inputs/`. The
 `restricted_inputs/` directory containing Political Compass questionnaires was
 removed from the current public tree on 2026-09-18. Its former name did not
-restrict access. Historical revisions may still contain these files; this is
-a current-tree cleanup, not an erasure of published history. Do not redistribute
-the propositions without permission from the rights holder.
+restrict access. The 13 raw chat/ablation Parquets are also withheld and replaced
+by text-free numerical projections. After these removals, main history was
+squashed using the Hub's history-cleanup operation. Existing downloads, forks
+or host caches are outside this operation; no universal erasure is claimed.
+Do not redistribute the propositions without permission from the rights holder.
 
-Raw Political Compass chat/ablation Parquets also contain statement text in
-prompts, visible responses and metadata. Removing the questionnaire directory
-does not remove those copies. Until their disposition is resolved, use the
-numerical `analysis_pct_*` layers for text-free aggregate reproduction.
+Raw originals are retained privately for audit. Public numerical outputs and
+`analysis_pct_*` tables support aggregate reproduction, but text-dependent
+qualitative diagnostics and reconstruction of the withheld scorer require
+authorized local material. This limitation is explicit; public files do not
+provide an out-of-the-box fresh-inference run for Political Compass.
 
 ## Intended use
 

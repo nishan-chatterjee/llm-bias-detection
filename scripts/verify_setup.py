@@ -67,7 +67,7 @@ def main() -> None:
         check_file(release / "metadata" / "manifest.json", errors, "dataset manifest")
         for name in [
             "political_compass_mcq",
-            "political_compass_chat",
+            "political_compass_chat_numeric",
             "ibm_sentiment",
             "hate_speech",
         ]:
