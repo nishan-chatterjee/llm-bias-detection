@@ -19,6 +19,8 @@ def main() -> None:
         help="Create or retain a private Dataset repository (public by default).",
     )
     args = parser.parse_args()
+    if not args.private and (args.stage / 'restricted_inputs').exists():
+        raise ValueError('Refusing to publish restricted questionnaire inputs; keep these locally.')
     owner, _name = args.repo_id.split("/", 1)
     api = HfApi()
     who = api.whoami()

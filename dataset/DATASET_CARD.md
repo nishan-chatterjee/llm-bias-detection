@@ -241,12 +241,17 @@ The `metadata/` directory contains:
 - conversion provenance for the historical hate-speech files;
 - a release manifest with checksums.
 
-Prompt templates and the IBM 30-topic extract are under `inputs/`. Political
-Compass proposition files are currently kept under `restricted_inputs/` while
-redistribution terms are resolved. The directory name does not create an
-access restriction in a public repository: do not mirror these files
-independently, and obtain explicit permission from the Political Compass
-rights holder before treating them as redistributable research data.
+Prompt templates and the IBM 30-topic extract are under `inputs/`. The
+`restricted_inputs/` directory containing Political Compass questionnaires was
+removed from the current public tree on 2026-09-18. Its former name did not
+restrict access. Historical revisions may still contain these files; this is
+a current-tree cleanup, not an erasure of published history. Do not redistribute
+the propositions without permission from the rights holder.
+
+Raw Political Compass chat/ablation Parquets also contain statement text in
+prompts, visible responses and metadata. Removing the questionnaire directory
+does not remove those copies. Until their disposition is resolved, use the
+numerical `analysis_pct_*` layers for text-free aggregate reproduction.
 
 ## Intended use
 
@@ -264,8 +269,8 @@ four checkpoints per family are insufficient for universal scaling claims.
 
 Political prompts and model responses may discuss death, punishment, race,
 religion, disability, segregation, sexuality, violence and other sensitive
-subjects. Hate-speech metadata identifies target groups, although source
-statements are not released. These materials are evaluation stimuli or model
+subjects. Hate-speech inputs contain the source statements and identify target
+groups. These materials are evaluation stimuli or model
 outputs; their inclusion is not endorsement.
 
 Do not use the Dataset to profile people, infer an individual's politics, or

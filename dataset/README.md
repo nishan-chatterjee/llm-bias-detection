@@ -7,15 +7,16 @@ python dataset/package_release.py \
   --source /path/to/veritas-vox \
   --stage /tmp/llm-bias-detection-hf-staging \
   --include-ablation \
-  --include-restricted-pct-inputs \
   --hate-results-dir /path/to/output_hate_speech/results_hs \
   --hate-design /path/to/output_hate_speech/experimental_design_hs.csv
 python dataset/validate_release.py /tmp/llm-bias-detection-hf-staging
 ```
 
-The proposition flag is suitable only when Political Compass redistribution
-permission has been documented. Omit it for any public Dataset release unless
-that documentation is available.
+The packager refuses the deprecated proposition-export flag. Provide any
+authorized questionnaire files locally for inference; do not publish them in
+this dataset or a public supplemental-code ZIP. The uploader also refuses a
+public stage containing a `restricted_inputs/` directory. This guard does not
+clear rights over text embedded in raw chat traces.
 
 The hate conversion validates the supplied design, eight primary models,
 1,800 configurations per model, 1,332 item positions per configuration, and

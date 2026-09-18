@@ -87,6 +87,8 @@ def package(args: argparse.Namespace) -> None:
     source = args.source.resolve()
     release = args.release.resolve()
     stage = args.stage.resolve()
+    if args.include_restricted_pct_inputs:
+        raise ValueError('Restricted Political Compass questionnaires are not exported; retain authorized inputs locally.')
     ensure_empty_target(stage)
     row_counts: dict[str, int] = {}
 
@@ -158,13 +160,6 @@ def package(args: argparse.Namespace) -> None:
         source / "tasks" / "political-compass" / "data" / "chat-prompts" / "english.json",
         stage / "inputs" / "political_compass" / "chat-prompts" / "english.json",
     )
-    if args.include_restricted_pct_inputs:
-        for path in sorted((source / "tasks" / "political-compass" / "data" / "questions").glob("*.json")):
-            copy(path, stage / "restricted_inputs" / "political_compass" / "questions" / path.name)
-        (stage / "restricted_inputs" / "README.md").write_text(
-            "Political Compass proposition files. Do not mirror independently pending explicit redistribution clearance.\n",
-            encoding="utf-8",
-        )
 
     # IBM topic sentiment.
     ibm_source = source / "tasks" / "stance-sentiment" / "output" / "mcq-v1-300" / "ibm-sentiment"
@@ -272,7 +267,7 @@ def package(args: argparse.Namespace) -> None:
 
     provenance = {
         "dataset_repo": args.dataset_repo,
-        "visibility": "set by uploader; public release uses a restricted_inputs namespace",
+        "visibility": "set by uploader; restricted questionnaire inputs are not exported",
         "primary_models": PRIMARY,
         "chat_variants": CHAT_VARIANTS,
         "included_secondary_ablation": bool(args.include_ablation),

@@ -47,6 +47,9 @@ tasks/political-compass/instrument/*.npz
 # workspace for reproduction.
 tasks/political-compass/data/questions/*.json
 tasks/political-compass/instrument/political_compass_data.csv
+restricted_inputs/
+**/restricted_inputs/
+docs/
 
 # The compact 30-topic IBM extract is tracked with CC BY-SA attribution. Local
 # Arrow caches of the full upstream test split are unnecessary for this task.

@@ -23,12 +23,13 @@ scoring parameters are intentionally excluded from the Git release pending
 explicit redistribution clearance. The supplied code does not grant rights to
 use or redistribute that material.
 
-The public companion dataset already contains proposition text, both as input
-JSON and embedded in chat records. No redistribution permission has been
-established. A public folder named `restricted_inputs` is not access-controlled.
-See the [official FAQ](https://www.politicalcompass.org/faq) and
-`docs/POLITICAL_COMPASS_RIGHTS.md` for the unresolved rights review. The portable
-aggregate analysis download avoids these inputs and raw chat text.
+The `restricted_inputs/` question directory is removed from the current public
+dataset tree. Older revisions may retain it; no history erasure is claimed.
+Raw chat records can also contain proposition text in statements, prompts,
+responses and metadata, so directory removal alone is not complete text removal.
+No redistribution permission has been established. See the dataset card for
+the current public trace scope and the [official FAQ](https://www.politicalcompass.org/faq)
+for upstream terms. The portable aggregate analysis download avoids raw text.
 
 ## Model checkpoints and outputs
 

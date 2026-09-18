@@ -90,23 +90,28 @@ withheld scorer parameters, discarded annotations, or the separate
 offensive-speech experiment and are therefore not the canonical runnable
 analysis.
 
-For a start-to-finish data download and notebook workflow, see
-[`docs/ANALYSIS_GUIDE.md`](docs/ANALYSIS_GUIDE.md). For model placement,
-four-GPU task launchers, and optional vLLM/llama.cpp servers, see
-[`docs/INFERENCE_GUIDE.md`](docs/INFERENCE_GUIDE.md). The exact paper-value
-aggregations and known working-manuscript corrections are documented in
-[`docs/MANUSCRIPT_RESULTS_AUDIT.md`](docs/MANUSCRIPT_RESULTS_AUDIT.md).
+The workflow below covers data download, checkpoint placement, task launchers
+and notebook execution. Task READMEs give task-specific details. Recompute the
+release-facing numerical checks with `scripts/verify_manuscript_results.py`.
 
-The latest workflow is pinned by code tag `peerj-review-v4`; the companion
-Dataset commit is `97f424a5bd962b12b9258c338130b77b4f75b34a`, also pinned in
-`scripts/download_dataset.py`. See
-[`docs/POLITICAL_COMPASS_RIGHTS.md`](docs/POLITICAL_COMPASS_RIGHTS.md) for the
-unresolved rights issue affecting full proposition text already in raw outputs.
-The compact `--component analysis` download avoids that text.
+The latest code release is `peerj-review-v5`; the companion dataset revision is
+pinned in `scripts/download_dataset.py`. Third-party rights and attribution
+are documented in `THIRD_PARTY_NOTICES.md`. The compact `--component analysis`
+download uses numerical derived tables, without the original questionnaire.
 
-For the supplemental-code ZIP, PeerJ upload legend, exact manuscript availability
-replacement, and optional Zenodo DOI workflow, see
-[`docs/PEERJ_SUPPLEMENT.md`](docs/PEERJ_SUPPLEMENT.md).
+The PeerJ supplemental-code ZIP contains the canonical source, environments,
+tests, compact analysis tables, notebooks with preserved outputs, and licensed
+hate-speech inputs. It excludes `legacy/` historical files, editorial/release
+notes formerly under `docs/`, model weights, scorer parameters and restricted
+questionnaire inputs. Historical code remains available on GitHub; no history
+was rewritten. Notebook figures are retained at their existing resolution.
+
+Build the <30 MB code subset from the release tag without changing file bytes:
+
+```bash
+python scripts/build_code_supplement.py --revision peerj-review-v5 \
+  --output /absolute/path/to/a-new-code.zip
+```
 
 The Political Compass qualitative-analysis directory contains the localized
 chat diagnostics used in the paper. Predefined cue matches are reported as
@@ -187,7 +192,7 @@ python scripts/download_models.py --models Qwen3-8B
 
 The companion dataset is pinned by default to the dataset commit matching this
 code release and is stored at `data/release/`. The complete current snapshot is
-approximately 775 MB; allow at least 1 GB of free space:
+documented in the dataset card; allow at least 1 GB of free space for the raw layers:
 
 For the canonical CPU notebooks, download only the compact analysis layer:
 
@@ -218,23 +223,22 @@ data/release/data/analysis_ready/
 ```
 
 The Political Compass items are third-party copyrighted material. The official
-FAQ states that unauthorized adoption or adaptation is restricted. Prior
-academic reproduction is not a licence, and a `restricted_inputs/` folder in a
-public Dataset is not technically access-restricted. Analysis does not need the
-proposition files: it uses released derived coordinates. Fresh inference
+FAQ restricts unauthorized adoption/adaptation; attribution is not permission.
+Questionnaire files are not included in this code supplement and the
+`restricted_inputs/` directory is no longer part of the dataset's current tree.
+Historical dataset revisions may retain older copies. Analysis uses released
+derived coordinates and does not need the proposition files. Fresh inference
 requires an authorized local copy in
-`tasks/political-compass/data/questions/<language>.json`. The downloader can
-install the currently deposited copy only after an explicit acknowledgement:
+`tasks/political-compass/data/questions/<language>.json`; obtain it under the
+upstream terms rather than through this release:
 
 ```bash
-python scripts/download_dataset.py --component political-compass \
-  --install-pct-questions --acknowledge-pct-terms
 python scripts/verify_setup.py --require-pct-inputs
 ```
 
-This acknowledgement does not grant permission. Obtain written clearance from
-the Political Compass rights holder before treating the proposition files as
-redistributable; see `THIRD_PARTY_NOTICES.md`.
+Obtain written clearance before redistributing the propositions. Removing a
+questionnaire directory alone does not remove text embedded in historical chat
+prompts, responses or metadata; the dataset card records the public trace scope.
 
 ### 4. Understand the inference backends
 

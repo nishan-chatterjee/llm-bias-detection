@@ -417,3 +417,25 @@ def test_llama_harness_requires_generated_marker(tmp_path, completion, success):
                             env=environment, capture_output=True, text=True, timeout=15)
     assert (result.returncode == 0) == success, result.stdout + result.stderr
     assert 'LLAMA_SMOKE_OK' not in 'Write the uppercase words LLAMA, SMOKE and OK joined by underscores.'
+
+
+def test_questionnaire_installation_is_not_an_attribution_opt_in():
+    module = load_module('pct_no_remote_question_install', ROOT / 'scripts/download_dataset.py')
+    with pytest.raises(ValueError, match='not distributed'):
+        module.install_pct_questions(ROOT)
+    result = subprocess.run([sys.executable, str(ROOT / 'scripts/download_dataset.py'),
+                             '--install-pct-questions', '--acknowledge-pct-terms', '--dry-run'],
+                            text=True, capture_output=True)
+    assert result.returncode != 0 and 'not distributed' in result.stderr
+    assert not any('restricted_inputs' in pattern for patterns in module.COMPONENT_PATTERNS.values()
+                   for pattern in patterns)
+
+
+def test_code_supplement_excludes_editorial_legacy_and_restricted_material():
+    module = load_module('canonical_code_supplement', ROOT / 'scripts/build_code_supplement.py')
+    for path in ['legacy/history.ipynb', 'docs/FUNDING.md', 'restricted_inputs/questions.json',
+                 'tasks/political-compass/data/questions/english.json', 'models/scorer.npz', 'models/x.gguf']:
+        assert module.excluded(path)
+    for path in ['README.md', 'tasks/hate-speech/data/corpus/english.jsonl',
+                 'tasks/political-compass/analysis/notebooks/02_chat_analysis_primary_models.ipynb']:
+        assert not module.excluded(path)

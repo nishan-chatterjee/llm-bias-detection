@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Download the companion dataset and optionally install runnable PCT inputs."""
+"""Download the companion dataset and optionally install licensed hate inputs."""
 
 from __future__ import annotations
 
@@ -12,9 +12,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_REPO = "nishan-chatterjee/llm-bias-detection"
 DEFAULT_TARGET = ROOT / "data" / "release"
-DEFAULT_REVISION = "97f424a5bd962b12b9258c338130b77b4f75b34a"
+DEFAULT_REVISION = "33a2f02a19eeea7ddd42706d8a5d6f3e26ac2ea2"
 COMPONENT_PATTERNS = {
-    "inputs": ["README.md", "inputs/**", "restricted_inputs/**", "metadata/**",
+    "inputs": ["README.md", "inputs/**", "metadata/**",
                "LICENSE-CC-BY-4.0.md", "THIRD_PARTY_NOTICES.md"],
     "analysis": ["README.md", "data/analysis_ready/**", "metadata/**",
                  "LICENSE-CC-BY-4.0.md", "THIRD_PARTY_NOTICES.md"],
@@ -25,7 +25,6 @@ COMPONENT_PATTERNS = {
         "data/political_compass_*/**",
         "data/analysis_ready/political_compass/**",
         "inputs/political_compass/**",
-        "restricted_inputs/political_compass/**",
         "metadata/**",
     ],
     "sentiment": [
@@ -64,20 +63,7 @@ def install_hate_inputs(snapshot: Path, root: Path = ROOT) -> int:
 
 
 def install_pct_questions(snapshot: Path) -> int:
-    source = snapshot / "restricted_inputs" / "political_compass" / "questions"
-    if not source.is_dir():
-        raise FileNotFoundError(
-            f"Political Compass question directory is absent from the snapshot: {source}"
-        )
-    target = ROOT / "tasks" / "political-compass" / "data" / "questions"
-    target.mkdir(parents=True, exist_ok=True)
-    count = 0
-    for path in sorted(source.glob("*.json")):
-        shutil.copy2(path, target / path.name)
-        count += 1
-    if count != 14:
-        raise ValueError(f"Expected 14 Political Compass language files; installed {count}")
-    return count
+    raise ValueError('Political Compass questionnaires are not distributed; obtain authorized inputs locally.')
 
 
 def main() -> None:
@@ -99,8 +85,8 @@ def main() -> None:
         "--install-pct-questions",
         action="store_true",
         help=(
-            "Copy the 14 downloaded proposition files into the runner's ignored input "
-            "directory. Use only if you have confirmed authorization under the upstream terms."
+            "Deprecated: Political Compass questionnaires are no longer distributed. "
+            "Provide authorized local inputs yourself."
         ),
     )
     parser.add_argument(
@@ -112,10 +98,10 @@ def main() -> None:
     parser.add_argument('--install-hate-inputs', action='store_true',
                         help='Install verified corpus/prompt files without overwriting different local inputs.')
     args = parser.parse_args()
-    if args.install_pct_questions and not args.acknowledge_pct_terms:
+    if args.install_pct_questions:
         parser.error(
-            "--install-pct-questions requires --acknowledge-pct-terms. "
-            "See THIRD_PARTY_NOTICES.md and https://www.politicalcompass.org/faq."
+            "Political Compass questionnaires are not distributed. Provide authorized "
+            "local files; see THIRD_PARTY_NOTICES.md."
         )
     if args.install_hate_inputs and args.component not in ['all', 'inputs', 'hate-speech', 'hate-inputs']:
         parser.error('--install-hate-inputs requires a component that downloads the hate inputs')
@@ -133,6 +119,7 @@ def main() -> None:
             revision=args.revision,
             local_dir=target,
             allow_patterns=COMPONENT_PATTERNS.get(args.component),
+            ignore_patterns=['restricted_inputs/**'],
         )
     )
     if args.install_pct_questions:
